@@ -20,6 +20,34 @@ A front-end application of a real-time system monitoring platform, built on Next
 - ✅ Modernize the UI component library
 - ✅ Type-safe TypeScript
 
+## Configuration
+
+### Using config.json (Recommended)
+
+Create a `config.json` file in the frontend directory based on `config.example.json`:
+
+```json
+{
+  "apiUrl": "http://localhost:7788"
+}
+```
+
+The configuration file will be automatically read during build time. If the file doesn't exist, it will use the default value `http://localhost:7788`.
+
+### Using Environment Variables
+
+Alternatively, you can set the API URL using environment variables:
+
+```bash
+# .env.local (for development)
+NEXT_PUBLIC_API_URL=http://localhost:7788
+
+# .env.production (for production)
+NEXT_PUBLIC_API_URL=https://your-api-server.com
+```
+
+**Priority:** Environment variables > config.json > default value
+
 ## Development
 
 ### Install dependencies
@@ -27,6 +55,20 @@ A front-end application of a real-time system monitoring platform, built on Next
 ```bash
 pnpm install
 ```
+
+### Configure the backend URL
+
+1. Copy the example config file:
+   ```bash
+   cp config.example.json config.json
+   ```
+
+2. Edit `config.json` and set the `apiUrl` to your backend server address:
+   ```json
+   {
+     "apiUrl": "http://localhost:7788"
+   }
+   ```
 
 ### Start the development server
 
