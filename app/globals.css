@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode colors */
+    --background: 255 255 255; /* #FFFFFF */
+    --background-secondary: 249 250 251; /* #F9FAFB */
+    --foreground: 17 24 39; /* #111827 */
+    --foreground-secondary: 107 114 128; /* #6B7280 */
+    
+    --primary: 59 130 246; /* #3B82F6 - Blue */
+    --success: 16 185 129; /* #10B981 - Green */
+    --warning: 245 158 11; /* #F59E0B - Yellow */
+    --danger: 239 68 68; /* #EF4444 - Red */
+    
+    --card: 255 255 255;
+    --card-hover: 249 250 251;
+    --border: 229 231 235;
+    --shadow: 0 0 0;
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --background: 17 24 39; /* #111827 */
+    --background-secondary: 31 41 55; /* #1F2937 */
+    --foreground: 249 250 251; /* #F9FAFB */
+    --foreground-secondary: 156 163 175; /* #9CA3AF */
+    
+    --primary: 96 165 250; /* #60A5FA - Light Blue */
+    --success: 52 211 153; /* #34D399 - Light Green */
+    --warning: 251 191 36; /* #FBBF24 - Light Yellow */
+    --danger: 248 113 113; /* #F87171 - Light Red */
+    
+    --card: 31 41 55;
+    --card-hover: 55 65 81;
+    --border: 55 65 81;
+    --shadow: 0 0 0;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Smooth scrolling */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  /* GPU acceleration and performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  /* Prevent layout shift during animations */
+  .contain-layout {
+    contain: layout;
+  }
+  
+  .contain-paint {
+    contain: paint;
+  }
+  
+  .contain-strict {
+    contain: strict;
+  }
+  
+  /* Optimize text rendering */
+  .optimize-text {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Custom scrollbar */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-background-secondary;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-foreground-secondary rounded-full;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    @apply bg-foreground;
+  }
+  
+  /* Thin scrollbar for virtualized lists */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-foreground-secondary/50 rounded-full;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-foreground-secondary;
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

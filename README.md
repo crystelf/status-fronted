@@ -1,0 +1,96 @@
+# Status-Frontend
+
+A front-end application of a real-time system monitoring platform, built on Next.js 14.
+
+## Technology Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Style**: Tailwind CSS
+- **UI Components**: Radix UI
+- **Animation**: Framer Motion
+- **Icons**: Lucide React
+- **Charts**: Recharts
+
+## Functional features
+
+- ✅ Responsive design (mobile, tablet, desktop)
+- ✅ Light/dark theme switching
+- ✅ Automatic detection of system topic preferences
+- ✅ Modernize the UI component library
+- ✅ Type-safe TypeScript
+
+## Development
+
+### Install dependencies
+
+```bash
+pnpm install
+```
+
+### Start the development server
+
+```bash
+pnpm dev
+```
+
+Visit [http://localhost:7777](http://localhost:7777) to view the app.
+
+### Build a production version
+
+```bash
+pnpm build
+```
+
+### Start the production server
+
+```bash
+pnpm start
+```
+
+### Code Check
+
+```bash
+pnpm lint
+pnpm type-check
+```
+
+### Code formatting
+
+```bash
+pnpm format
+```
+
+## Responsive breakpoints
+
+- **Mobile**: < 768px
+- **Tablet**: 768px - 1023px
+- **Desktop**: > 1024px
+
+## Theme System
+
+The app supports three theme modes:
+
+1. **Light**: Bright color mode
+2. **Dark**: Dark mode
+3. **System**: Follow the system settings (default)
+
+Theme preferences are automatically saved to localStorage.
+
+## Color scheme
+
+### Bright color mode
+- Background: #FFFFFF, #F9FAFB
+- Foreground: #111827, #6B7280
+- Primary: #3B82F6 (Blue)
+- Success: #10B981 (green)
+- Warning: #F59E0B (yellow)
+- Danger: #EF4444 (Red)
+
+### Dark mode
+- Background: #111827, #1F2937
+- Foreground: #F9FAFB, #9CA3AF
+- Primary: #60A5FA (light blue)
+- Success: #34D399 (light green)
+- Warning: #FBBF24 (light yellow)
+- Danger: #F87171 (light red)
