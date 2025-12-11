@@ -568,19 +568,22 @@ export default function DashboardPage() {
                     </div>
 
                     {/* History Chart */}
-                    {expandedMetric && clientHistory && clientHistory.length > 0 && (
-                      <motion.div
-                        variants={slideVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        style={{
-                          willChange: 'transform, opacity',
-                        }}
-                      >
-                        <HistoryChart type={expandedMetric as any} data={clientHistory} />
-                      </motion.div>
-                    )}
+                    <AnimatePresence mode="wait">
+                      {expandedMetric && clientHistory && clientHistory.length > 0 && (
+                        <motion.div
+                          key={expandedMetric}
+                          variants={slideVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                          style={{
+                            willChange: 'transform, opacity',
+                          }}
+                        >
+                          <HistoryChart type={expandedMetric as any} data={clientHistory} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               </div>

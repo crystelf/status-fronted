@@ -28,11 +28,19 @@ export interface HistoryChartProps {
  * Format bytes to human readable format
  */
 function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return '0 B'
   if (bytes === 0) return '0 B'
   
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  
+  // Handle small values
+  if (bytes < 1) return `${bytes.toFixed(2)} B`
+
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
+  if (i < 0) return `${bytes.toFixed(2)} B`
+  if (i >= sizes.length) return `${(bytes / Math.pow(k, sizes.length - 1)).toFixed(1)} ${sizes[sizes.length - 1]}`
   
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
 }
@@ -115,8 +123,8 @@ function transformData(type: MetricType, data: DynamicSystemStatus[]) {
       case 'network':
         return {
           ...baseData,
-          upload: status.networkUpload,
-          download: status.networkDownload
+          upload: status.networkUpload ?? 0,
+          download: status.networkDownload ?? 0
         }
       case 'swap':
         return {
@@ -150,19 +158,19 @@ function CustomTooltip({ active, payload, label, type }: any) {
           <div className="flex items-center gap-2 text-sm">
             <div className="w-3 h-3 rounded-full bg-primary" />
             <span className="text-foreground-secondary">上行:</span>
-            <span className="font-semibold">{formatSpeed(payload[0]?.value || 0)}</span>
+            <span className="font-semibold">{formatSpeed(payload?.[0]?.value ?? 0)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm mt-1">
             <div className="w-3 h-3 rounded-full bg-success" />
             <span className="text-foreground-secondary">下行:</span>
-            <span className="font-semibold">{formatSpeed(payload[1]?.value || 0)}</span>
+            <span className="font-semibold">{formatSpeed(payload?.[1]?.value ?? 0)}</span>
           </div>
         </>
       ) : (
         <div className="flex items-center gap-2 text-sm">
           <div className="w-3 h-3 rounded-full bg-primary" />
           <span className="text-foreground-secondary">使用率:</span>
-          <span className="font-semibold">{payload[0]?.value?.toFixed(1)}%</span>
+          <span className="font-semibold">{payload?.[0]?.value?.toFixed(1) ?? 0}%</span>
         </div>
       )}
     </motion.div>
@@ -207,9 +215,10 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
       className={cn(
         'rounded-lg border border-border bg-card p-6',
         className
@@ -272,8 +281,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
                 stroke="rgb(var(--primary))"
                 strokeWidth={2}
                 dot={false}
-                animationDuration={1000}
-                animationEasing="ease-in-out"
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
@@ -282,8 +290,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
                 stroke="rgb(var(--success))"
                 strokeWidth={2}
                 dot={false}
-                animationDuration={1000}
-                animationEasing="ease-in-out"
+                isAnimationActive={false}
               />
             </>
           ) : (
@@ -294,8 +301,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
               stroke="rgb(var(--primary))"
               strokeWidth={2}
               dot={false}
-              animationDuration={1000}
-              animationEasing="ease-in-out"
+              isAnimationActive={false}
             />
           )}
         </LineChart>

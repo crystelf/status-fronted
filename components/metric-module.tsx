@@ -76,11 +76,19 @@ function getMetricLabel(type: MetricType): string {
  * Format bytes to human readable format
  */
 function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return '0 B'
   if (bytes === 0) return '0 B'
   
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  
+  // Handle small values
+  if (bytes < 1) return `${bytes.toFixed(2)} B`
+
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
+  if (i < 0) return `${bytes.toFixed(2)} B`
+  if (i >= sizes.length) return `${(bytes / Math.pow(k, sizes.length - 1)).toFixed(1)} ${sizes[sizes.length - 1]}`
   
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
 }

@@ -4,7 +4,7 @@
  * Requirements: 9.6, 9.7
  */
 
-import { Transition, Variants } from 'framer-motion'
+import { Transition, Variants, TargetAndTransition } from 'framer-motion'
 
 /**
  * GPU-accelerated transition configuration
@@ -59,7 +59,7 @@ export const cardVariants: Variants = {
  * Tap/click animation
  * Uses scale transform for GPU acceleration
  */
-export const tapAnimation = {
+export const tapAnimation: TargetAndTransition = {
   scale: 0.98,
   transition: { 
     duration: 0.1,
@@ -71,7 +71,7 @@ export const tapAnimation = {
  * Hover animation
  * Uses scale transform for GPU acceleration
  */
-export const hoverAnimation = {
+export const hoverAnimation: TargetAndTransition = {
   scale: 1.02,
   transition: smoothTransition,
 }

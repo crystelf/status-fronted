@@ -123,7 +123,7 @@ function UsageDonut({
 
   const data = [
     { name: 'used', value: safeValue, color: usedColor },
-    { name: 'free', value: freeValue, color: 'rgb(75, 85, 99)' }, // gray-600 for visibility
+    { name: 'free', value: freeValue, color: 'rgb(var(--border))' }, // Adaptive color for visibility in both modes
   ];
 
   return (

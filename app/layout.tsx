@@ -15,6 +15,32 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var storageKey = 'system-monitor-theme';
+                  var theme = localStorage.getItem(storageKey);
+                  var supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+                  var d = document.documentElement;
+                  d.classList.remove('light', 'dark');
+                  if (!theme || theme === 'system') {
+                    if (supportDarkMode) {
+                      d.classList.add('dark');
+                    } else {
+                      d.classList.add('light');
+                    }
+                  } else {
+                    d.classList.add(theme);
+                  }
+                } catch (e) {}
+              })()
+            `,
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="system-monitor-theme">
           {children}

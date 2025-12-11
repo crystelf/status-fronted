@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, RefObject } from 'react'
 import { ClientSummary } from '@/lib/api-client'
 import { ClientCard } from './client-card'
 
@@ -12,7 +12,7 @@ interface VirtualizedGridProps {
 /**
  * Calculate grid dimensions based on container width
  */
-function useGridDimensions(containerRef: React.RefObject<HTMLDivElement>) {
+function useGridDimensions(containerRef: RefObject<HTMLDivElement | null>) {
   const [dimensions, setDimensions] = useState({
     columnCount: 1,
     columnWidth: 400,
