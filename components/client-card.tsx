@@ -495,14 +495,14 @@ export const ClientCard = memo(
         {!status && (
           <div className="text-center text-sm text-foreground-secondary py-8">
             <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
-            <p>暂无实时占用数据</p>
+            <p>No real-time occupancy data </p>
           </div>
         )}
 
         {/* Footer: Last Update */}
         <div className="border-t border-border pt-3 mt-4">
           <div className="flex items-center justify-between text-xs text-foreground-secondary">
-            <span>最后更新</span>
+            <span>Last updated</span>
             <span>{new Date(client.lastUpdate).toLocaleTimeString('zh-CN')}</span>
           </div>
         </div>

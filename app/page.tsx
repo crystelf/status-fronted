@@ -297,7 +297,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header with Logo and Theme Toggle */}
-      <Header title="系统监控平台" />
+      <Header title="System Status" />
 
       <main className="py-6">
         <Container>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
                   )}
                 >
                   <Grid3x3 className="w-4 h-4" />
-                  网格视图
+                  Grid view
                 </button>
 
                 <button
@@ -337,7 +337,7 @@ export default function DashboardPage() {
                   )}
                 >
                   <Layers className="w-4 h-4" />
-                  按标签分组
+                  Group by label
                 </button>
 
                 <button
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                   )}
                 >
                   <Layers className="w-4 h-4" />
-                  按用途分组
+                  Group by use
                 </button>
 
                 <button
@@ -365,7 +365,7 @@ export default function DashboardPage() {
                   )}
                 >
                   <Layers className="w-4 h-4" />
-                  按平台分组
+                  Grouped by platform
                 </button>
               </div>
 
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                 )}
               >
                 <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
-                刷新
+                Refresh
               </button>
             </div>
           </div>
@@ -398,7 +398,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-foreground-secondary">加载客户端数据...</p>
+                <p className="text-foreground-secondary">Loading client data...</p>
               </div>
             </div>
           )}
@@ -425,14 +425,14 @@ export default function DashboardPage() {
           {!loading && processedClients && processedClients.length === 0 && (
             <div className="text-center py-20">
               <p className="text-foreground-secondary text-lg mb-2">
-                {selectedTags.length > 0 ? '没有匹配的客户端' : '暂无客户端数据'}
+                {selectedTags.length > 0 ? 'There are no matching clients' : 'No client data at the moment'}
               </p>
               {selectedTags.length > 0 && (
                 <button
                   onClick={() => setSelectedTags([])}
                   className="text-primary hover:text-primary/80 text-sm"
                 >
-                  清除筛选条件
+                  Clear the filter
                 </button>
               )}
             </div>
@@ -468,10 +468,10 @@ export default function DashboardPage() {
                     {/* Detail Header */}
                     <div className="flex items-start justify-between mb-6 gap-4">
                       <div className="space-y-1">
-                        <h2 className="text-2xl font-bold">{'hostname' in detail ? detail.hostname : '未命名客户端'}</h2>
+                        <h2 className="text-2xl font-bold">{'hostname' in detail ? detail.hostname : 'unnamed client'}</h2>
                         <p className="text-foreground-secondary">
-                          {'platform' in detail ? detail.platform : '未知平台'}
-                          {'clientPurpose' in detail && detail.clientPurpose ? ` • ${detail.clientPurpose}` : '未知用途'}
+                          {'platform' in detail ? detail.platform : 'unknown platform'}
+                          {'clientPurpose' in detail && detail.clientPurpose ? ` • ${detail.clientPurpose}` : 'unknown purpose'}
                         </p>
                         {'staticInfo' in detail && detail.staticInfo.location && (
                           <p className="text-sm text-foreground-secondary">
@@ -492,38 +492,38 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-4 gap-4 mb-6">
                       <div className="space-y-1">
                         <p className="text-sm text-foreground-secondary">CPU</p>
-                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.cpuModel : '未知CPU'}</p>
+                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.cpuModel : 'unknown cpu model'}</p>
                         <p className="text-xs text-foreground-secondary">
-                          {'staticInfo' in detail ? detail.staticInfo.cpuCores : '未知核心'} C •{' '}
-                          {'staticInfo' in detail ? detail.staticInfo.cpuArch : '未知架构'}
+                          {'staticInfo' in detail ? detail.staticInfo.cpuCores : 'unknown cpu cores'} C •{' '}
+                          {'staticInfo' in detail ? detail.staticInfo.cpuArch : 'unknown cpu arch'}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <p className="text-sm text-foreground-secondary">系统</p>
-                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.systemVersion : '未知系统版本'}</p>
+                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.systemVersion : 'unknown system version'}</p>
                         <p className="text-xs text-foreground-secondary">
-                          {'staticInfo' in detail ? detail.staticInfo.systemModel : '未知系统模型'}
+                          {'staticInfo' in detail ? detail.staticInfo.systemModel : 'unknown system model'}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <p className="text-sm text-foreground-secondary">内存</p>
                         <p className="font-medium">
-                          {('staticInfo' in detail ? (detail.staticInfo.totalMemory / 1024 ** 3).toFixed(1) : '未知内存')} GB
+                          {('staticInfo' in detail ? (detail.staticInfo.totalMemory / 1024 ** 3).toFixed(1) : 'unknown memory')} GB
                         </p>
                         <p className="text-xs text-foreground-secondary">
-                          {'staticInfo' in detail ? `Swap: ${(detail.staticInfo.totalSwap / 1024 ** 3).toFixed(1)} GB` : '未知Swap'}
+                          {'staticInfo' in detail ? `Swap: ${(detail.staticInfo.totalSwap / 1024 ** 3).toFixed(1)} GB` : 'unknown swap'}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <p className="text-sm text-foreground-secondary">磁盘</p>
                         <p className="font-medium">
-                          {'staticInfo' in detail ? (detail.staticInfo.totalDisk / 1024 ** 3).toFixed(1) : '未知磁盘'} GB
+                          {'staticInfo' in detail ? (detail.staticInfo.totalDisk / 1024 ** 3).toFixed(1) : 'unknown disk'} GB
                         </p>
                         <p className="text-xs text-foreground-secondary">
-                          {'staticInfo' in detail ? detail.staticInfo.diskType : '未知磁盘类型'}
+                          {'staticInfo' in detail ? detail.staticInfo.diskType : 'unknown disk type'}
                         </p>
                       </div>
                     </div>
@@ -532,36 +532,36 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-5 gap-4 mb-6">
                       <MetricModule
                         type="cpu"
-                        value={('currentStatus' in detail ? detail.currentStatus.cpuUsage : '未知CPU占用率') as number}
+                        value={('currentStatus' in detail ? detail.currentStatus.cpuUsage : 'unknown cpu usage') as number}
                         onExpand={() => handleMetricClick('cpu')}
                         expanded={expandedMetric === 'cpu'}
                       />
 
                       <MetricModule
                         type="memory"
-                        value={('currentStatus' in detail ? detail.currentStatus.memoryUsage : '未知内存占用率') as number}
+                        value={('currentStatus' in detail ? detail.currentStatus.memoryUsage : 'unknown memory usage') as number}
                         onExpand={() => handleMetricClick('memory')}
                         expanded={expandedMetric === 'memory'}
                       />
 
                       <MetricModule
                         type="disk"
-                        value={('currentStatus' in detail ? detail.currentStatus.diskUsage : '未知磁盘占用率') as number}
+                        value={('currentStatus' in detail ? detail.currentStatus.diskUsage : 'unknown disk usage') as number}
                         onExpand={() => handleMetricClick('disk')}
                         expanded={expandedMetric === 'disk'}
                       />
 
                       <MetricModule
                         type="network"
-                        value={('currentStatus' in detail ? detail.currentStatus.networkUpload : '未知上传速率') as number}
-                        secondaryValue={('currentStatus' in detail ? detail.currentStatus.networkDownload : '未知下载速率') as number}
+                        value={('currentStatus' in detail ? detail.currentStatus.networkUpload : 'unknown upload rate') as number}
+                        secondaryValue={('currentStatus' in detail ? detail.currentStatus.networkDownload : 'unknown download rate') as number}
                         onExpand={() => handleMetricClick('network')}
                         expanded={expandedMetric === 'network'}
                       />
 
                       <MetricModule
                         type="swap"
-                        value={('currentStatus' in detail ? detail.currentStatus.swapUsage : '未知Swap占用率') as number}
+                        value={('currentStatus' in detail ? detail.currentStatus.swapUsage : 'unknown swap usage') as number}
                         onExpand={() => handleMetricClick('swap')}
                         expanded={expandedMetric === 'swap'}
                       />

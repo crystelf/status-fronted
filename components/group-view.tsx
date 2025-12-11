@@ -81,18 +81,18 @@ function getPlatformDisplayName(platform: string): string {
  * GroupSection Component
  * Displays a collapsible group of clients
  */
-function GroupSection({
-  groupName,
-  clients,
-  groupBy,
-  onClientClick,
-  index,
-}: {
-  groupName: string;
-  clients: ClientSummary[];
-  groupBy: 'tags' | 'purpose' | 'platform';
-  onClientClick?: (clientId: string) => void;
-  index: number;
+function GroupSection({ groupName,
+clients,
+groupBy,
+onClientClick,
+index,
+key }: {
+  groupName: string,
+  clients: ClientSummary[],
+  groupBy: 'tags' | 'purpose' | 'platform',
+  onClientClick?: (clientId: string) => void,
+  index: number,
+  key?: string
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -167,14 +167,12 @@ function GroupSection({
 /**
  * GroupView Component
  * Displays clients grouped by tags, purpose, or platform
- * Requirements: 10.2, 10.4
  */
 export function GroupView({ clients, groupBy, onClientClick }: GroupViewProps) {
   const groups = groupClients(clients, groupBy);
 
   // Sort groups by name
   const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
-    // Put "未分类" or "未指定用途" at the end
     if (a[0].startsWith('未')) return 1;
     if (b[0].startsWith('未')) return -1;
     return a[0].localeCompare(b[0], 'zh-CN');
@@ -183,7 +181,7 @@ export function GroupView({ clients, groupBy, onClientClick }: GroupViewProps) {
   if (sortedGroups.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-foreground-secondary">暂无客户端数据</p>
+        <p className="text-foreground-secondary">No client data at the moment</p>
       </div>
     );
   }
