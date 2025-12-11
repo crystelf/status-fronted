@@ -46,14 +46,15 @@ export function useIncrementalClients() {
   const changedClientsRef = useRef<Set<string>>(new Set());
 
   const fetchClients = useCallback(async () => {
-    // Don't show loading on subsequent fetches (incremental updates)
-    const isInitialLoad = state.clients.size === 0;
-
-    setState((prev) => ({
-      ...prev,
-      loading: isInitialLoad,
-      error: null,
-    }));
+    setState((prev) => {
+      // Don't show loading on subsequent fetches (incremental updates)
+      const isInitialLoad = prev.clients.size === 0;
+      return {
+        ...prev,
+        loading: isInitialLoad,
+        error: null,
+      };
+    });
 
     try {
       const newClients = await apiClient.fetchAllClients();
@@ -96,7 +97,8 @@ export function useIncrementalClients() {
         };
       });
 
-      return Array.from(state.clients.values());
+      // Return current clients from state (will be updated after setState)
+      return newClients;
     } catch (error) {
       const userError = handleApiError(error);
       logError(error, 'useIncrementalClients');
@@ -109,7 +111,7 @@ export function useIncrementalClients() {
 
       throw error;
     }
-  }, [state.clients]);
+  }, []); // Remove state.clients dependency to prevent infinite loops
 
   const retry = useCallback(() => {
     return fetchClients();

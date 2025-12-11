@@ -1,11 +1,34 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Cpu, HardDrive, MemoryStick, Network, Circle, Tag } from 'lucide-react';
+import {
+  Network,
+  Circle,
+  Tag,
+  Cpu,
+  HardDrive,
+  MemoryStick,
+  Activity,
+  Server,
+  Monitor,
+  Smartphone,
+} from 'lucide-react';
+import {
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 import { ClientSummary, ClientDetail } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
-import { cardVariants, tapAnimation, getAccessibleTransition } from '@/lib/animation-config';
+import { cardVariants, tapAnimation } from '@/lib/animation-config';
 
 interface ClientCardProps {
   client: ClientSummary | ClientDetail;
@@ -14,20 +37,38 @@ interface ClientCardProps {
 }
 
 /**
- * Get platform icon based on OS type
+ * Get platform icon component based on OS type
  */
 function getPlatformIcon(platform: string) {
   const platformLower = platform.toLowerCase();
-
   if (platformLower.includes('windows') || platformLower === 'win32') {
-    return '🪟';
+    return Monitor;
   } else if (platformLower.includes('linux')) {
-    return '🐧';
+    return Server;
   } else if (platformLower.includes('darwin') || platformLower.includes('mac')) {
-    return '🍎';
+    return Smartphone;
   }
+  return Server;
+}
 
-  return '🖥️';
+/**
+ * Get simplified platform name
+ */
+function getPlatformName(platform: string, systemVersion?: string): string {
+  const platformLower = platform.toLowerCase();
+  if (platformLower.includes('windows')) {
+    return 'Windows';
+  } else if (platformLower.includes('linux')) {
+    if (systemVersion) {
+      // Extract distro name from version string like "Ubuntu 24.04" or "Debian"
+      const match = systemVersion.match(/^([A-Za-z]+)/);
+      return match ? match[1] : 'Linux';
+    }
+    return 'Linux';
+  } else if (platformLower.includes('darwin') || platformLower.includes('mac')) {
+    return 'macOS';
+  }
+  return platform;
 }
 
 /**
@@ -35,11 +76,9 @@ function getPlatformIcon(platform: string) {
  */
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
-
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
@@ -51,53 +90,222 @@ function formatSpeed(bytesPerSecond: number): string {
 }
 
 /**
- * Get time ago string
+ * Get usage color based on percentage
  */
-function getTimeAgo(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}天前`;
-  if (hours > 0) return `${hours}小时前`;
-  if (minutes > 0) return `${minutes}分钟前`;
-  return `${seconds}秒前`;
+function getUsageColor(value: number): string {
+  if (value >= 80) return 'rgb(var(--danger))';
+  if (value >= 60) return 'rgb(var(--warning))';
+  return 'rgb(var(--success))';
 }
 
 /**
- * Progress bar component with GPU-accelerated animation
- * Uses scaleX transform instead of width for better performance
+ * Get free color - visible in both light and dark mode
  */
-function ProgressBar({ value, className }: { value: number; className?: string }) {
-  const percentage = Math.min(Math.max(value, 0), 100);
+function getFreeColor(): string {
+  return 'hsl(var(--border-h) var(--border-s) calc(var(--border-l) * 1.3))';
+}
 
-  // Color based on usage
-  let colorClass = 'bg-success';
-  if (percentage >= 80) {
-    colorClass = 'bg-danger';
-  } else if (percentage >= 60) {
-    colorClass = 'bg-warning';
-  }
+/**
+ * Interactive Donut Chart with hover effects and lift animation
+ */
+function UsageDonut({
+  label,
+  value,
+  usedColor,
+  detail,
+  memoryInfo,
+}: {
+  label: string;
+  value: number | undefined;
+  usedColor: string;
+  detail?: string;
+  memoryInfo?: { used: number; total: number };
+}) {
+  const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
+  const safeValue = Number.isFinite(value) ? Math.min(Math.max(value ?? 0, 0), 100) : 0;
+  const freeValue = 100 - safeValue;
+
+  const data = [
+    { name: 'used', value: safeValue, color: usedColor },
+    { name: 'free', value: freeValue, color: 'rgb(75, 85, 99)' }, // gray-600 for visibility
+  ];
 
   return (
-    <div
-      className={cn('h-2 w-full bg-background-secondary rounded-full overflow-hidden', className)}
-    >
+    <div className="flex flex-col items-center gap-2">
       <motion.div
-        className={cn('h-full rounded-full', colorClass)}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: percentage / 100 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        style={{
-          originX: 0,
-          transformOrigin: 'left',
-          willChange: 'transform',
-        }}
-      />
+        className="relative h-20 w-20"
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              innerRadius="65%"
+              outerRadius="100%"
+              startAngle={90}
+              endAngle={-270}
+              paddingAngle={0}
+              stroke="none"
+              onMouseEnter={(_: any, index: number) => setHoveredSegment(data[index].name)}
+              onMouseLeave={() => setHoveredSegment(null)}
+            >
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  style={{
+                    filter: hoveredSegment === entry.name ? 'brightness(1.2)' : 'none',
+                    transition: 'filter 0.2s, transform 0.2s',
+                    cursor: 'pointer',
+                  }}
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-sm font-bold">{safeValue.toFixed(1)}%</span>
+        </div>
+      </motion.div>
+      <div className="text-center">
+        <div className="text-xs font-semibold">{label}</div>
+        {memoryInfo ? (
+          <div className="text-xs text-foreground-secondary mt-0.5">
+            {memoryInfo.used.toFixed(1)}g/{memoryInfo.total.toFixed(1)}g
+          </div>
+        ) : detail ? (
+          <div className="text-xs text-foreground-secondary mt-0.5">{detail}</div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Disk usage progress bar
+ */
+function DiskProgressBar({
+  label,
+  value,
+  totalBytes,
+  usedBytes,
+}: {
+  label: string;
+  value: number;
+  totalBytes: number;
+  usedBytes: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const usedColor = getUsageColor(value);
+  const usedGB = (usedBytes / 1024 ** 3).toFixed(1);
+  const totalGB = (totalBytes / 1024 ** 3).toFixed(1);
+
+  return (
+    <div 
+      className="space-y-1.5"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-semibold">{label}</span>
+        <span className="text-foreground-secondary">
+          {usedGB}g / {totalGB}g
+        </span>
+      </div>
+      <div className="h-2.5 w-full bg-gray-600 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: usedColor }}
+          initial={{ width: 0 }}
+          animate={{ 
+            width: `${value}%`,
+            filter: hovered ? 'brightness(1.2)' : 'brightness(1)'
+          }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Network line chart for mini view
+ */
+function NetworkLineChart({
+  upload,
+  download,
+  history,
+}: {
+  upload?: number;
+  download?: number;
+  history?: Array<{ timestamp: number; upload: number; download: number }>;
+}) {
+  // Generate mock history data if not provided (for preview)
+  const chartData = history
+    ? history.slice(-20).map((h) => ({
+        time: new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        upload: h.upload,
+        download: h.download,
+      }))
+    : Array.from({ length: 20 }, (_, i) => ({
+        time: `${i}`,
+        upload: (upload || 0) * (0.8 + Math.random() * 0.4),
+        download: (download || 0) * (0.8 + Math.random() * 0.4),
+      }));
+
+  const maxValue = Math.max(
+    ...chartData.map((d) => Math.max(d.upload, d.download)),
+    1
+  );
+
+  return (
+    <div className="h-32 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgb(var(--border))" opacity={0.3} />
+          <XAxis
+            dataKey="time"
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 10 }}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => formatBytes(value)}
+            tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 10 }}
+            domain={[0, maxValue * 1.1]}
+          />
+          <RechartsTooltip
+            formatter={(value: any) => formatSpeed(Number(value))}
+            labelStyle={{ color: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
+            contentStyle={{
+              background: 'rgb(var(--card))',
+              border: '1px solid rgb(var(--border))',
+              borderRadius: 8,
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="upload"
+            stroke="rgb(var(--primary))"
+            strokeWidth={2}
+            dot={false}
+            name="上行"
+          />
+          <Line
+            type="monotone"
+            dataKey="download"
+            stroke="rgb(var(--success))"
+            strokeWidth={2}
+            dot={false}
+            name="下行"
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -111,14 +319,36 @@ function isClientDetail(client: ClientSummary | ClientDetail): client is ClientD
 
 /**
  * ClientCard Component
- * Displays client status with animations and interactive features
- * Memoized to prevent unnecessary re-renders during incremental updates
- * Requirements: 5.2, 5.3, 9.3, 9.4, 9.7, 9.8
+ * Modern card design with donut charts and line graphs
  */
 export const ClientCard = memo(
   function ClientCard({ client, onClick, index = 0 }: ClientCardProps) {
     const isOnline = client.status === 'online';
     const hasDetailedInfo = isClientDetail(client);
+    const status = hasDetailedInfo ? client.currentStatus : undefined;
+    const staticInfo = hasDetailedInfo ? client.staticInfo : undefined;
+
+    const PlatformIcon = getPlatformIcon(client.platform);
+    const platformName = getPlatformName(
+      client.platform,
+      staticInfo?.systemVersion
+    );
+
+    // Calculate memory info
+    const memoryInfo = staticInfo && status
+      ? {
+          used: (staticInfo.totalMemory * status.memoryUsage / 100) / 1024 ** 3,
+          total: staticInfo.totalMemory / 1024 ** 3,
+        }
+      : undefined;
+
+    // Calculate disk info
+    const diskInfo = staticInfo && status
+      ? {
+          used: (staticInfo.totalDisk * status.diskUsage / 100) / 1024 ** 3,
+          total: staticInfo.totalDisk / 1024 ** 3,
+        }
+      : undefined;
 
     return (
       <motion.div
@@ -127,32 +357,47 @@ export const ClientCard = memo(
         initial="hidden"
         animate="visible"
         whileTap={onClick ? tapAnimation : undefined}
+        whileHover={onClick ? { borderColor: 'rgb(59, 130, 246)' } : undefined}
         className={cn(
-          'rounded-lg border border-border bg-card p-6',
-          'shadow-sm hover:shadow-md transition-shadow duration-200',
-          onClick && 'cursor-pointer hover:bg-card-hover'
+          'rounded-xl border-2 border-border bg-card p-5',
+          'shadow-sm hover:shadow-lg transition-all duration-300',
+          onClick && 'cursor-pointer'
         )}
         onClick={() => onClick?.(client.clientId)}
         style={{
-          // Force GPU acceleration
           willChange: 'transform, opacity',
           transform: 'translateZ(0)',
         }}
       >
-        {/* Header: Name and Status */}
+        {/* Header: Server Name and Status */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-2xl flex-shrink-0" aria-label={`Platform: ${client.platform}`}>
-              {getPlatformIcon(client.platform)}
-            </span>
-            <h3 className="text-lg font-semibold truncate" title={client.clientName}>
-              {client.clientName}
-            </h3>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex-shrink-0">
+              <PlatformIcon className="w-6 h-6 text-foreground-secondary" strokeWidth={1.5} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-bold truncate mb-1">{client.hostname}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-foreground-secondary">{platformName}</span>
+                {staticInfo?.cpuArch && (
+                  <>
+                    <span className="text-xs text-foreground-secondary">•</span>
+                    <span className="text-xs text-foreground-secondary">{staticInfo.cpuArch}</span>
+                  </>
+                )}
+                {staticInfo?.location && (
+                  <>
+                    <span className="text-xs text-foreground-secondary">•</span>
+                    <span className="text-xs text-foreground-secondary">{staticInfo.location}</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Circle
               className={cn(
-                'w-3 h-3',
+                'w-2.5 h-2.5',
                 isOnline
                   ? 'fill-success text-success'
                   : 'fill-foreground-secondary text-foreground-secondary'
@@ -160,8 +405,10 @@ export const ClientCard = memo(
             />
             <span
               className={cn(
-                'text-sm font-medium',
-                isOnline ? 'text-success' : 'text-foreground-secondary'
+                'text-xs font-medium px-2 py-0.5 rounded-full',
+                isOnline
+                  ? 'bg-success/10 text-success'
+                  : 'bg-foreground-secondary/10 text-foreground-secondary'
               )}
             >
               {isOnline ? '在线' : '离线'}
@@ -171,132 +418,103 @@ export const ClientCard = memo(
 
         {/* Tags */}
         {client.clientTags && client.clientTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {client.clientTags.map((tag, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md bg-primary/10 text-primary"
+                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md bg-primary/10 text-primary border border-primary/20"
               >
-                <Tag className="w-3 h-3" />
+                <Tag className="w-3 h-3" strokeWidth={1.5} />
                 {tag}
               </span>
             ))}
           </div>
         )}
 
-        {/* Purpose */}
-        {client.clientPurpose && (
-          <p
-            className="text-sm text-foreground-secondary mb-4 line-clamp-2"
-            title={client.clientPurpose}
-          >
-            用途: {client.clientPurpose}
-          </p>
-        )}
-
-        <div className="border-t border-border my-4" />
-
-        {/* System Info */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-foreground-secondary">系统</span>
-            <span
-              className="font-medium truncate ml-2"
-              title={`${client.platform} ${hasDetailedInfo ? client.staticInfo.systemVersion : ''}`}
-            >
-              {client.platform} {hasDetailedInfo && client.staticInfo.systemVersion}
-            </span>
-          </div>
-
-          {hasDetailedInfo && client.staticInfo.location && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-secondary">位置</span>
-              <span className="font-medium">{client.staticInfo.location}</span>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-foreground-secondary">主机名</span>
-            <span className="font-medium truncate ml-2" title={client.hostname}>
-              {client.hostname}
-            </span>
-          </div>
-        </div>
-
-        {/* Metrics - Only show if we have detailed status */}
-        {hasDetailedInfo && client.currentStatus && (
+        {/* Hardware Section - Three Donut Charts in a row */}
+        {status && (
           <>
-            <div className="border-t border-border my-4" />
-
-            <div className="space-y-3">
-              {/* CPU */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-foreground-secondary" />
-                    <span className="text-foreground-secondary">CPU</span>
-                  </div>
-                  <span className="font-medium">{client.currentStatus.cpuUsage.toFixed(1)}%</span>
-                </div>
-                <ProgressBar value={client.currentStatus.cpuUsage} />
-              </div>
-
-              {/* Memory */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <MemoryStick className="w-4 h-4 text-foreground-secondary" />
-                    <span className="text-foreground-secondary">内存</span>
-                  </div>
-                  <span className="font-medium">
-                    {client.currentStatus.memoryUsage.toFixed(1)}%
-                  </span>
-                </div>
-                <ProgressBar value={client.currentStatus.memoryUsage} />
-              </div>
-
-              {/* Disk */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <HardDrive className="w-4 h-4 text-foreground-secondary" />
-                    <span className="text-foreground-secondary">磁盘</span>
-                  </div>
-                  <span className="font-medium">{client.currentStatus.diskUsage.toFixed(1)}%</span>
-                </div>
-                <ProgressBar value={client.currentStatus.diskUsage} />
-              </div>
-
-              {/* Network */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <Network className="w-4 h-4 text-foreground-secondary" />
-                    <span className="text-foreground-secondary">网络</span>
-                  </div>
-                  <span className="font-medium text-xs">
-                    ↑{formatSpeed(client.currentStatus.networkUpload)} ↓
-                    {formatSpeed(client.currentStatus.networkDownload)}
-                  </span>
-                </div>
+            <div className="mb-3">
+              <div className="grid grid-cols-3 gap-2">
+                <UsageDonut
+                  label="CPU"
+                  value={status.cpuUsage}
+                  usedColor={getUsageColor(status.cpuUsage)}
+                  detail={
+                    staticInfo
+                      ? `${staticInfo.cpuCores}C`
+                      : undefined
+                  }
+                />
+                <UsageDonut
+                  label="Memory"
+                  value={status.memoryUsage}
+                  usedColor={getUsageColor(status.memoryUsage)}
+                  memoryInfo={memoryInfo}
+                />
+                <UsageDonut
+                  label="Swap"
+                  value={status.swapUsage > 0 ? status.swapUsage : undefined}
+                  usedColor={getUsageColor(status.swapUsage || 0)}
+                  detail={status.swapUsage > 0 ? `${status.swapUsage.toFixed(1)}%` : 'N/A'}
+                />
               </div>
             </div>
+
+            {/* Network Section - Line Chart */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <h4 className="text-xs font-semibold text-foreground">Network</h4>
+                <div className="flex items-center gap-2 text-xs text-foreground-secondary">
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <span>↑ {formatSpeed(status.networkUpload)}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                    <span>↓ {formatSpeed(status.networkDownload)}</span>
+                  </div>
+                </div>
+              </div>
+              <NetworkLineChart
+                upload={status.networkUpload}
+                download={status.networkDownload}
+              />
+            </div>
+
+            {/* Disk Section - Progress Bar */}
+            {diskInfo && (
+              <div className="mb-3">
+                <DiskProgressBar
+                  label="Disk"
+                  value={status.diskUsage}
+                  totalBytes={staticInfo!.totalDisk}
+                  usedBytes={staticInfo!.totalDisk * status.diskUsage / 100}
+                />
+              </div>
+            )}
           </>
         )}
 
-        <div className="border-t border-border my-4" />
+        {!status && (
+          <div className="text-center text-sm text-foreground-secondary py-8">
+            <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
+            <p>暂无实时占用数据</p>
+          </div>
+        )}
 
-        {/* Last Update */}
-        <div className="flex items-center justify-between text-sm text-foreground-secondary">
-          <span>最后更新</span>
-          <span>{getTimeAgo(client.lastUpdate)}</span>
+        {/* Footer: Last Update */}
+        <div className="border-t border-border pt-3 mt-4">
+          <div className="flex items-center justify-between text-xs text-foreground-secondary">
+            <span>最后更新</span>
+            <span>{new Date(client.lastUpdate).toLocaleTimeString('zh-CN')}</span>
+          </div>
         </div>
       </motion.div>
     );
   },
-  (prevProps, nextProps) => {
+  (prevProps: ClientCardProps, nextProps: ClientCardProps) => {
     // Custom comparison function for memo
-    // Only re-render if client data actually changed
     return (
       prevProps.client.clientId === nextProps.client.clientId &&
       prevProps.client.status === nextProps.client.status &&

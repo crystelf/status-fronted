@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { slideVariants, expandVariants } from '@/lib/animation-config';
+import { fadeVariants, fastTransition, slideVariants, smoothTransition } from '@/lib/animation-config';
 import { Header } from '@/components/header';
 import { Container } from '@/components/container';
 import { TagFilter } from '@/components/tag-filter';
@@ -11,7 +11,7 @@ import { ErrorDisplay } from '@/components/error-display';
 import { VirtualizedGrid } from '@/components/virtualized-grid';
 import { useClientDetail, useClientHistory } from '@/lib/use-api';
 import { useIncrementalClients } from '@/lib/use-incremental-clients';
-import { ClientSummary } from '@/lib/api-client';
+import { ClientSummary, ClientDetail, apiClient } from '@/lib/api-client';
 import { Loader2, Layers, Grid3x3, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MetricModule } from '@/components/metric-module';
@@ -52,6 +52,25 @@ function applyOfflineDetection(clients: ClientSummary[]): ClientSummary[] {
 }
 
 /**
+ * Modal animation variants
+ */
+const modalVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: smoothTransition,
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.95,
+    transition: fastTransition,
+  },
+};
+
+/**
  * Filter clients by selected tags
  */
 function filterClientsByTags(clients: ClientSummary[], selectedTags: string[]): ClientSummary[] {
@@ -86,7 +105,6 @@ function extractAllTags(clients: ClientSummary[]): string[] {
 /**
  * Dashboard Page Component
  * Main monitoring dashboard with auto-refresh and offline detection
- * Requirements: 5.1, 5.3, 5.5
  */
 export default function DashboardPage() {
   // API hooks with incremental updates
@@ -96,7 +114,6 @@ export default function DashboardPage() {
     error,
     fetchClients,
     retry,
-    lastUpdate,
   } = useIncrementalClients();
   const { data: selectedClientDetail, fetchDetail } = useClientDetail();
   const { data: clientHistory, fetchHistory } = useClientHistory();
@@ -107,14 +124,23 @@ export default function DashboardPage() {
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [clientDetailsMap, setClientDetailsMap] = useState<Map<string, ClientDetail>>(new Map());
+  
+  // Track pending requests to avoid duplicate requests
+  const pendingRequestsRef = useRef<Set<string>>(new Set());
+  const prefetchTimeoutRef = useRef<number | null>(null);
 
-  // Apply offline detection and tag filtering
-  const processedClients = clients
-    ? filterClientsByTags(applyOfflineDetection(clients), selectedTags)
-    : [];
+  // Apply offline detection and tag filtering - memoized to prevent unnecessary recalculations
+  const processedClients = useMemo(() => {
+    if (!clients) return [];
+    return filterClientsByTags(applyOfflineDetection(clients), selectedTags);
+  }, [clients, selectedTags]);
 
-  // Extract all available tags
-  const allTags = clients ? extractAllTags(clients) : [];
+  // Extract all available tags - memoized
+  const allTags = useMemo(() => {
+    if (!clients) return [];
+    return extractAllTags(clients);
+  }, [clients]);
 
   // Initial data fetch
   useEffect(() => {
@@ -142,28 +168,32 @@ export default function DashboardPage() {
     }
   }, [fetchClients]);
 
-  // Handle client card click - fetch detail and history
+  // Handle client card click - open detail modal
   const handleClientClick = useCallback(
     async (clientId: string) => {
-      if (expandedClientId === clientId) {
-        // Collapse if already expanded
-        setExpandedClientId(null);
-        setExpandedMetric(null);
-      } else {
-        // Expand and fetch details
-        setExpandedClientId(clientId);
-        setExpandedMetric('network'); // Default to network chart
+      // Always open the modal
+      setExpandedClientId(clientId);
+      setExpandedMetric('network'); // Default to network chart
 
-        // Fetch client detail
-        await fetchDetail(clientId);
-
-        // Fetch last 24 hours of history
-        const endTime = Date.now();
-        const startTime = endTime - 24 * 60 * 60 * 1000;
-        await fetchHistory(clientId, { startTime, endTime });
+      // Fetch client detail if not in cache
+      const cachedDetail = clientDetailsMap.get(clientId);
+      if (!cachedDetail) {
+        const detail = await fetchDetail(clientId);
+        if (detail) {
+          setClientDetailsMap((prev: Map<string, ClientDetail>) => {
+            const next = new Map(prev);
+            next.set(clientId, detail);
+            return next;
+          });
+        }
       }
+
+      // Fetch last 24 hours of history
+      const endTime = Date.now();
+      const startTime = endTime - 24 * 60 * 60 * 1000;
+      await fetchHistory(clientId, { startTime, endTime });
     },
-    [expandedClientId, fetchDetail, fetchHistory]
+    [fetchDetail, fetchHistory, clientDetailsMap]
   );
 
   // Handle metric module click
@@ -177,6 +207,79 @@ export default function DashboardPage() {
     setExpandedMetric(null);
   }, []);
 
+  // Prefetch client details for all visible clients
+  useEffect(() => {
+    if (!processedClients || processedClients.length === 0) return;
+
+    const missing = processedClients.filter(
+      (c: ClientSummary) => !clientDetailsMap.has(c.clientId) && !pendingRequestsRef.current.has(c.clientId)
+    );
+
+    if (missing.length === 0) return;
+
+    if (prefetchTimeoutRef.current !== null) {
+      clearTimeout(prefetchTimeoutRef.current);
+    }
+
+    // Immediate fetch for initial load
+    const isInitialLoad = clientDetailsMap.size === 0;
+    const delay = isInitialLoad ? 100 : 500;
+    
+    prefetchTimeoutRef.current = window.setTimeout(() => {
+      const stillMissing = processedClients.filter(
+        (c: ClientSummary) => !clientDetailsMap.has(c.clientId) && !pendingRequestsRef.current.has(c.clientId)
+      );
+
+      if (stillMissing.length === 0) return;
+      
+      // Fetch more aggressively on initial load
+      const batchSize = isInitialLoad ? 10 : 5;
+      const toFetch = stillMissing.slice(0, batchSize);
+
+      toFetch.forEach((client: ClientSummary) => {
+        pendingRequestsRef.current.add(client.clientId);
+
+        apiClient
+          .fetchClientDetail(client.clientId)
+          .then((detail) => {
+            if (detail) {
+              setClientDetailsMap((prev: Map<string, ClientDetail>) => {
+                if (prev.has(client.clientId)) return prev;
+                const next = new Map(prev);
+                next.set(client.clientId, detail);
+                return next;
+              });
+            }
+          })
+          .catch(() => {
+            // Silently fail for prefetch
+          })
+          .finally(() => {
+            pendingRequestsRef.current.delete(client.clientId);
+          });
+      });
+    }, delay);
+
+    return () => {
+      if (prefetchTimeoutRef.current !== null) {
+        clearTimeout(prefetchTimeoutRef.current);
+      }
+    };
+  }, [processedClients, clientDetailsMap]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (expandedClientId) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [expandedClientId]);
+
   // Get group by value based on view mode
   const getGroupBy = (): 'tags' | 'purpose' | 'platform' => {
     if (viewMode === 'group-tags') return 'tags';
@@ -184,6 +287,12 @@ export default function DashboardPage() {
     if (viewMode === 'group-platform') return 'platform';
     return 'tags';
   };
+
+  // Memoize clients with details to prevent unnecessary re-renders
+  const clientsWithDetails = useMemo(
+    () => processedClients.map((c: ClientSummary) => clientDetailsMap.get(c.clientId) || c),
+    [processedClients, clientDetailsMap]
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -298,10 +407,13 @@ export default function DashboardPage() {
           {!loading && processedClients && processedClients.length > 0 && (
             <>
               {viewMode === 'grid' ? (
-                <VirtualizedGrid clients={processedClients} onClientClick={handleClientClick} />
+                <VirtualizedGrid
+                  clients={clientsWithDetails}
+                  onClientClick={handleClientClick}
+                />
               ) : (
                 <GroupView
-                  clients={processedClients}
+                  clients={clientsWithDetails}
                   groupBy={getGroupBy()}
                   onClientClick={handleClientClick}
                 />
@@ -326,137 +438,156 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Expanded Client Detail */}
-          <AnimatePresence mode="wait">
-            {expandedClientId && selectedClientDetail && (
-              <motion.div
-                variants={expandVariants}
-                initial="collapsed"
-                animate="expanded"
-                exit="collapsed"
-                className="mt-8 overflow-hidden"
-                style={{
-                  willChange: 'height, opacity',
-                }}
-              >
-                <div className="rounded-lg border border-border bg-card p-6">
-                  {/* Detail Header */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold mb-2">{selectedClientDetail.clientName}</h2>
-                      <p className="text-foreground-secondary">
-                        {selectedClientDetail.hostname} • {selectedClientDetail.platform}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={handleCloseDetail}
-                      className="p-2 rounded-md hover:bg-background-secondary transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Detailed System Info */}
-                  <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-4 gap-4 mb-6">
-                    <div className="space-y-1">
-                      <p className="text-sm text-foreground-secondary">CPU</p>
-                      <p className="font-medium">{selectedClientDetail.staticInfo.cpuModel}</p>
-                      <p className="text-xs text-foreground-secondary">
-                        {selectedClientDetail.staticInfo.cpuCores} 核心 •{' '}
-                        {selectedClientDetail.staticInfo.cpuArch}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-sm text-foreground-secondary">系统</p>
-                      <p className="font-medium">{selectedClientDetail.staticInfo.systemVersion}</p>
-                      <p className="text-xs text-foreground-secondary">
-                        {selectedClientDetail.staticInfo.systemModel}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-sm text-foreground-secondary">内存</p>
-                      <p className="font-medium">
-                        {(selectedClientDetail.staticInfo.totalMemory / 1024 ** 3).toFixed(1)} GB
-                      </p>
-                      <p className="text-xs text-foreground-secondary">
-                        Swap: {(selectedClientDetail.staticInfo.totalSwap / 1024 ** 3).toFixed(1)}{' '}
-                        GB
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-sm text-foreground-secondary">磁盘</p>
-                      <p className="font-medium">
-                        {(selectedClientDetail.staticInfo.totalDisk / 1024 ** 3).toFixed(1)} GB
-                      </p>
-                      <p className="text-xs text-foreground-secondary">
-                        {selectedClientDetail.staticInfo.diskType}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Metric Modules */}
-                  <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-5 gap-4 mb-6">
-                    <MetricModule
-                      type="cpu"
-                      value={selectedClientDetail.currentStatus.cpuUsage}
-                      onExpand={() => handleMetricClick('cpu')}
-                      expanded={expandedMetric === 'cpu'}
-                    />
-
-                    <MetricModule
-                      type="memory"
-                      value={selectedClientDetail.currentStatus.memoryUsage}
-                      onExpand={() => handleMetricClick('memory')}
-                      expanded={expandedMetric === 'memory'}
-                    />
-
-                    <MetricModule
-                      type="disk"
-                      value={selectedClientDetail.currentStatus.diskUsage}
-                      onExpand={() => handleMetricClick('disk')}
-                      expanded={expandedMetric === 'disk'}
-                    />
-
-                    <MetricModule
-                      type="network"
-                      value={selectedClientDetail.currentStatus.networkUpload}
-                      secondaryValue={selectedClientDetail.currentStatus.networkDownload}
-                      onExpand={() => handleMetricClick('network')}
-                      expanded={expandedMetric === 'network'}
-                    />
-
-                    <MetricModule
-                      type="swap"
-                      value={selectedClientDetail.currentStatus.swapUsage}
-                      onExpand={() => handleMetricClick('swap')}
-                      expanded={expandedMetric === 'swap'}
-                    />
-                  </div>
-
-                  {/* History Chart */}
-                  {expandedMetric && clientHistory && clientHistory.length > 0 && (
-                    <motion.div
-                      variants={slideVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      style={{
-                        willChange: 'transform, opacity',
-                      }}
-                    >
-                      <HistoryChart type={expandedMetric as any} data={clientHistory} />
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </Container>
       </main>
+
+      <AnimatePresence mode="wait">
+        {expandedClientId && (() => {
+          const detail = selectedClientDetail || clientDetailsMap.get(expandedClientId);
+          if (!detail) return null;
+          return (
+            <>
+              <motion.div
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                variants={fadeVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onClick={handleCloseDetail}
+              />
+              <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+                <motion.div
+                  variants={modalVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-6 tablet:p-8">
+                    {/* Detail Header */}
+                    <div className="flex items-start justify-between mb-6 gap-4">
+                      <div className="space-y-1">
+                        <h2 className="text-2xl font-bold">{'hostname' in detail ? detail.hostname : '未命名客户端'}</h2>
+                        <p className="text-foreground-secondary">
+                          {'platform' in detail ? detail.platform : '未知平台'}
+                          {'clientPurpose' in detail && detail.clientPurpose ? ` • ${detail.clientPurpose}` : '未知用途'}
+                        </p>
+                        {'staticInfo' in detail && detail.staticInfo.location && (
+                          <p className="text-sm text-foreground-secondary">
+                            {detail.staticInfo.location}
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={handleCloseDetail}
+                        className="p-2 rounded-md hover:bg-background-secondary transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Detailed System Info */}
+                    <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-4 gap-4 mb-6">
+                      <div className="space-y-1">
+                        <p className="text-sm text-foreground-secondary">CPU</p>
+                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.cpuModel : '未知CPU'}</p>
+                        <p className="text-xs text-foreground-secondary">
+                          {'staticInfo' in detail ? detail.staticInfo.cpuCores : '未知核心'} C •{' '}
+                          {'staticInfo' in detail ? detail.staticInfo.cpuArch : '未知架构'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-sm text-foreground-secondary">系统</p>
+                        <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.systemVersion : '未知系统版本'}</p>
+                        <p className="text-xs text-foreground-secondary">
+                          {'staticInfo' in detail ? detail.staticInfo.systemModel : '未知系统模型'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-sm text-foreground-secondary">内存</p>
+                        <p className="font-medium">
+                          {('staticInfo' in detail ? (detail.staticInfo.totalMemory / 1024 ** 3).toFixed(1) : '未知内存')} GB
+                        </p>
+                        <p className="text-xs text-foreground-secondary">
+                          {'staticInfo' in detail ? `Swap: ${(detail.staticInfo.totalSwap / 1024 ** 3).toFixed(1)} GB` : '未知Swap'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-sm text-foreground-secondary">磁盘</p>
+                        <p className="font-medium">
+                          {'staticInfo' in detail ? (detail.staticInfo.totalDisk / 1024 ** 3).toFixed(1) : '未知磁盘'} GB
+                        </p>
+                        <p className="text-xs text-foreground-secondary">
+                          {'staticInfo' in detail ? detail.staticInfo.diskType : '未知磁盘类型'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Metric Modules */}
+                    <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-5 gap-4 mb-6">
+                      <MetricModule
+                        type="cpu"
+                        value={('currentStatus' in detail ? detail.currentStatus.cpuUsage : '未知CPU占用率') as number}
+                        onExpand={() => handleMetricClick('cpu')}
+                        expanded={expandedMetric === 'cpu'}
+                      />
+
+                      <MetricModule
+                        type="memory"
+                        value={('currentStatus' in detail ? detail.currentStatus.memoryUsage : '未知内存占用率') as number}
+                        onExpand={() => handleMetricClick('memory')}
+                        expanded={expandedMetric === 'memory'}
+                      />
+
+                      <MetricModule
+                        type="disk"
+                        value={('currentStatus' in detail ? detail.currentStatus.diskUsage : '未知磁盘占用率') as number}
+                        onExpand={() => handleMetricClick('disk')}
+                        expanded={expandedMetric === 'disk'}
+                      />
+
+                      <MetricModule
+                        type="network"
+                        value={('currentStatus' in detail ? detail.currentStatus.networkUpload : '未知上传速率') as number}
+                        secondaryValue={('currentStatus' in detail ? detail.currentStatus.networkDownload : '未知下载速率') as number}
+                        onExpand={() => handleMetricClick('network')}
+                        expanded={expandedMetric === 'network'}
+                      />
+
+                      <MetricModule
+                        type="swap"
+                        value={('currentStatus' in detail ? detail.currentStatus.swapUsage : '未知Swap占用率') as number}
+                        onExpand={() => handleMetricClick('swap')}
+                        expanded={expandedMetric === 'swap'}
+                      />
+                    </div>
+
+                    {/* History Chart */}
+                    {expandedMetric && clientHistory && clientHistory.length > 0 && (
+                      <motion.div
+                        variants={slideVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        style={{
+                          willChange: 'transform, opacity',
+                        }}
+                      >
+                        <HistoryChart type={expandedMetric as any} data={clientHistory} />
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
     </div>
   );
 }

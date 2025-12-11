@@ -34,8 +34,8 @@
     --danger: 248 113 113; /* #F87171 - Light Red */
     
     --card: 31 41 55;
-    --card-hover: 55 65 81;
-    --border: 55 65 81;
+    --card-hover: 31 41 55;
+    --border: 75 85 99; /* #4B5563 - gray-600 for better visibility */
     --shadow: 0 0 0;
   }
 }
