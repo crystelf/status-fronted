@@ -3,12 +3,8 @@
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Network,
   Circle,
   Tag,
-  Cpu,
-  HardDrive,
-  MemoryStick,
   Activity,
   Server,
   Monitor,
@@ -325,8 +321,8 @@ export const ClientCard = memo(
   function ClientCard({ client, onClick, index = 0 }: ClientCardProps) {
     const isOnline = client.status === 'online';
     const hasDetailedInfo = isClientDetail(client);
-    const status = hasDetailedInfo ? client.currentStatus : undefined;
-    const staticInfo = hasDetailedInfo ? client.staticInfo : undefined;
+    const status = hasDetailedInfo ? 'currentStatus' in client ? client.currentStatus : undefined : undefined;
+    const staticInfo = hasDetailedInfo ? 'staticInfo' in client ? client.staticInfo : undefined : undefined;
 
     const PlatformIcon = getPlatformIcon(client.platform);
     const platformName = getPlatformName(

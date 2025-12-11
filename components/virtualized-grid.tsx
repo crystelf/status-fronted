@@ -1,7 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import { Grid } from 'react-window'
+import React, { useRef, useEffect, useState } from 'react'
 import { ClientSummary } from '@/lib/api-client'
 import { ClientCard } from './client-card'
 

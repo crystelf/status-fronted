@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import React from 'react';
 
 interface GridProps {
   children: React.ReactNode
@@ -22,9 +23,9 @@ export function Grid({
   gap = 4
 }: GridProps) {
   const gridCols = {
-    mobile: `grid-cols-${cols.mobile || 1}`,
-    tablet: `tablet:grid-cols-${cols.tablet || 2}`,
-    desktop: `desktop:grid-cols-${cols.desktop || 3}`,
+    mobile: `grid-cols-${!(cols) || cols.mobile || 1}`,
+    tablet: `tablet:grid-cols-${!(cols) || cols.tablet || 2}`,
+    desktop: `desktop:grid-cols-${!(cols) || cols.desktop || 3}`,
   }
 
   return (

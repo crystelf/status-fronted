@@ -74,10 +74,10 @@ interface ApiClientConfig {
  * API Client Class
  */
 export class ApiClient {
-  private baseUrl: string;
-  private timeout: number;
-  private maxRetries: number;
-  private retryDelay: number;
+  private readonly baseUrl: string;
+  private readonly timeout: number;
+  private readonly maxRetries: number;
+  private readonly retryDelay: number;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl || 'http://localhost:7788';
