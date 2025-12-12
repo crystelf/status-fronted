@@ -34,8 +34,8 @@ export function MetricDemo() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-4">监控指标模块演示</h2>
-        <p className="text-foreground-secondary mb-6">点击任意指标卡片查看历史趋势图表</p>
+        <h2 className="text-2xl font-bold mb-4">Monitoring Metrics Demo</h2>
+        <p className="text-foreground-secondary mb-6">Click any metric card to view historical trend charts</p>
       </div>
 
       {/* Metrics Grid */}
@@ -97,7 +97,7 @@ export function MetricDemo() {
 
       {/* Network Chart (Default Display) */}
       <div>
-        <h3 className="text-xl font-semibold mb-4">网络图表</h3>
+        <h3 className="text-xl font-semibold mb-4">Network Chart</h3>
         <HistoryChart type="network" data={sampleData} />
       </div>
     </div>

@@ -60,11 +60,11 @@ function getMetricLabel(type: MetricType): string {
     case 'cpu':
       return 'CPU'
     case 'memory':
-      return '内存'
+      return 'Memory'
     case 'disk':
-      return '磁盘'
+      return 'Disk'
     case 'network':
-      return '网络'
+      return 'Network'
     case 'swap':
       return 'Swap'
     default:
@@ -267,3 +267,4 @@ export const MetricModule = memo(function MetricModule({
     JSON.stringify(prevProps.history) === JSON.stringify(nextProps.history)
   )
 })
+

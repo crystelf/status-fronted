@@ -41,10 +41,10 @@ export function formatRelativeTime(timestamp: number): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days}天前`;
-  if (hours > 0) return `${hours}小时前`;
-  if (minutes > 0) return `${minutes}分钟前`;
-  return `${seconds}秒前`;
+  if (days > 0) return `${days} days ago`;
+  if (hours > 0) return `${hours} hours ago`;
+  if (minutes > 0) return `${minutes} minutes ago`;
+  return `${seconds} seconds ago`;
 }
 
 // Re-export API client utilities
@@ -59,3 +59,4 @@ export type {
 export { handleApiError, logError, ErrorType } from './error-handler';
 export type { UserFriendlyError } from './error-handler';
 export { useAllClients, useClientDetail, useClientHistory } from './use-api';
+

@@ -33,8 +33,8 @@ function groupClients(
           groups.get(tag)!.push(client);
         });
       } else {
-        // Clients without tags go to "未分类"
-        const noTagKey = '未分类';
+        // Clients without tags go to "Uncategorized"
+        const noTagKey = 'Uncategorized';
         if (!groups.has(noTagKey)) {
           groups.set(noTagKey, []);
         }
@@ -42,7 +42,7 @@ function groupClients(
       }
     } else if (groupBy === 'purpose') {
       // Group by purpose
-      const purpose = client.clientPurpose || '未指定用途';
+      const purpose = client.clientPurpose || 'Unspecified Purpose';
       if (!groups.has(purpose)) {
         groups.set(purpose, []);
       }
@@ -126,7 +126,7 @@ index }: {
 
           <div className="text-left">
             <h3 className="text-lg font-semibold">{displayName}</h3>
-            <p className="text-sm text-foreground-secondary">{clients.length} 个客户端</p>
+            <p className="text-sm text-foreground-secondary">{clients.length} clients</p>
           </div>
         </div>
 
@@ -199,4 +199,7 @@ export function GroupView({ clients, groupBy, onClientClick }: GroupViewProps) {
     </div>
   );
 }
+
+
+
 

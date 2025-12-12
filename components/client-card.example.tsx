@@ -124,8 +124,8 @@ export function ClientCardExample() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold mb-4">ClientCard 示例</h2>
-        <p className="text-foreground-secondary mb-6">展示不同状态和平台的客户端卡片</p>
+        <h2 className="text-2xl font-bold mb-4">ClientCard Examples</h2>
+        <p className="text-foreground-secondary mb-6">Display client cards with different statuses and platforms</p>
       </div>
 
       {/* Grid layout */}
@@ -137,7 +137,7 @@ export function ClientCardExample() {
 
       {/* Summary card without detailed info */}
       <div>
-        <h3 className="text-xl font-semibold mb-4">简化卡片</h3>
+        <h3 className="text-xl font-semibold mb-4">Simplified Card</h3>
         <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-6">
           <ClientCard client={mockClientSummary} onClick={handleCardClick} index={0} />
         </div>
@@ -145,3 +145,5 @@ export function ClientCardExample() {
     </div>
   );
 }
+
+

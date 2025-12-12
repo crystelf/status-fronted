@@ -20,7 +20,7 @@ export function ClientListExample() {
   }, [fetchClients]);
 
   if (loading) {
-    return <div>加载中...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
@@ -29,11 +29,11 @@ export function ClientListExample() {
 
   return (
     <div>
-      <h2>客户端列表</h2>
+      <h2>Client List</h2>
       {clients?.map((client) => (
         <div key={client.clientId}>
           <h3>{client.clientName}</h3>
-          <p>状态: {client.status}</p>
+          <p>Status: {client.status}</p>
         </div>
       ))}
     </div>
@@ -51,7 +51,7 @@ export function ClientDetailExample({ clientId }: { clientId: string }) {
   }, [clientId, fetchDetail]);
 
   if (loading) {
-    return <div>加载中...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
@@ -66,7 +66,7 @@ export function ClientDetailExample({ clientId }: { clientId: string }) {
     <div>
       <h2>{detail.clientName}</h2>
       <p>CPU: {detail.currentStatus.cpuUsage}%</p>
-      <p>内存: {detail.currentStatus.memoryUsage}%</p>
+      <p>Memory: {detail.currentStatus.memoryUsage}%</p>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export function ClientHistoryExample({ clientId }: { clientId: string }) {
   }, [clientId, fetchHistory]);
 
   if (loading) {
-    return <div>加载中...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
@@ -94,10 +94,10 @@ export function ClientHistoryExample({ clientId }: { clientId: string }) {
 
   return (
     <div>
-      <h2>历史数据</h2>
+      <h2>Historical Data</h2>
       {history?.map((status, index) => (
         <div key={index}>
-          <p>时间: {new Date(status.timestamp).toLocaleString()}</p>
+          <p>Time: {new Date(status.timestamp).toLocaleString()}</p>
           <p>CPU: {status.cpuUsage}%</p>
         </div>
       ))}
@@ -132,3 +132,7 @@ export async function directApiExample() {
     console.error('API Error:', error);
   }
 }
+
+
+
+

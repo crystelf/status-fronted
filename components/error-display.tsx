@@ -52,7 +52,7 @@ export function ErrorDisplay({ error, onRetry, className = '' }: ErrorDisplayPro
           className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-md transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
-          重试
+          Retry
         </button>
       )}
     </div>
@@ -80,7 +80,7 @@ export function InlineErrorDisplay({ error, onRetry, className = '' }: ErrorDisp
         <button
           onClick={onRetry}
           className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-          title="重试"
+          title="Retry"
         >
           <RefreshCw className="h-4 w-4" />
         </button>
@@ -88,3 +88,4 @@ export function InlineErrorDisplay({ error, onRetry, className = '' }: ErrorDisp
     </div>
   );
 }
+

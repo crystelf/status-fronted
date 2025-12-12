@@ -41,7 +41,7 @@ export function TagFilter({ tags, selectedTags, onTagSelect }: TagFilterProps) {
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-foreground-secondary" />
           <h3 className="text-sm font-medium text-foreground-secondary">
-            标签筛选
+            Tag Filter
           </h3>
         </div>
         
@@ -51,7 +51,7 @@ export function TagFilter({ tags, selectedTags, onTagSelect }: TagFilterProps) {
             className="text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
           >
             <X className="w-3 h-3" />
-            清除全部
+            Clear All
           </button>
         )}
       </div>
@@ -94,7 +94,7 @@ export function TagFilter({ tags, selectedTags, onTagSelect }: TagFilterProps) {
           animate={{ opacity: 1, y: 0 }}
           className="text-xs text-foreground-secondary"
         >
-          已选择 {selectedTags.length} 个标签
+          {selectedTags.length} tags selected
         </motion.div>
       )}
     </div>

@@ -39,8 +39,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     if (error.message.includes('Network error') || error.message.includes('Unable to connect')) {
       return {
         type: ErrorType.NETWORK,
-        title: '网络连接失败',
-        message: '无法连接到服务器，请检查网络连接或服务器状态',
+        title: 'Network Connection Failed',
+        message: 'Unable to connect to the server. Please check your network connection or server status',
         canRetry: true,
         originalError: error,
       };
@@ -50,8 +50,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     if (error.message.includes('timeout')) {
       return {
         type: ErrorType.TIMEOUT,
-        title: '请求超时',
-        message: '服务器响应时间过长，请稍后重试',
+        title: 'Request Timeout',
+        message: 'Server response time is too long. Please try again later',
         canRetry: true,
         originalError: error,
       };
@@ -61,8 +61,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     if (error.statusCode === 404) {
       return {
         type: ErrorType.NOT_FOUND,
-        title: '资源不存在',
-        message: '请求的客户端或资源不存在',
+        title: 'Resource Not Found',
+        message: 'The requested client or resource does not exist',
         canRetry: false,
         originalError: error,
       };
@@ -72,8 +72,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     if (error.statusCode === 400) {
       return {
         type: ErrorType.VALIDATION,
-        title: '请求参数错误',
-        message: error.message || '请求参数不正确，请检查输入',
+        title: 'Request Parameter Error',
+        message: error.message || 'Request parameters are incorrect. Please check your input',
         canRetry: false,
         originalError: error,
       };
@@ -83,8 +83,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     if (error.statusCode && error.statusCode >= 500) {
       return {
         type: ErrorType.SERVER,
-        title: '服务器错误',
-        message: '服务器遇到错误，请稍后重试',
+        title: 'Server Error',
+        message: 'Server encountered an error. Please try again later',
         canRetry: true,
         originalError: error,
       };
@@ -93,8 +93,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
     // Other API errors
     return {
       type: ErrorType.UNKNOWN,
-      title: '请求失败',
-      message: error.message || '发生未知错误',
+      title: 'Request Failed',
+      message: error.message || 'An unknown error occurred',
       canRetry: true,
       originalError: error,
     };
@@ -104,8 +104,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
   if (error instanceof Error) {
     return {
       type: ErrorType.UNKNOWN,
-      title: '发生错误',
-      message: error.message || '发生未知错误',
+      title: 'Error Occurred',
+      message: error.message || 'An unknown error occurred',
       canRetry: false,
       originalError: error,
     };
@@ -114,8 +114,8 @@ export function handleApiError(error: unknown): UserFriendlyError {
   // Handle unknown error types
   return {
     type: ErrorType.UNKNOWN,
-    title: '发生错误',
-    message: '发生未知错误，请稍后重试',
+    title: 'Error Occurred',
+    message: 'An unknown error occurred, please try again later',
     canRetry: false,
     originalError: error,
   };
@@ -149,3 +149,10 @@ export function isRetryableError(error: unknown): boolean {
   const userError = handleApiError(error);
   return userError.canRetry;
 }
+
+
+
+
+
+
+

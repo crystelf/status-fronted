@@ -57,7 +57,7 @@ function formatSpeed(bytesPerSecond: number): string {
  */
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp)
-  return date.toLocaleTimeString('zh-CN', { 
+  return date.toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit',
     second: '2-digit'
@@ -70,17 +70,17 @@ function formatTime(timestamp: number): string {
 function getChartTitle(type: MetricType): string {
   switch (type) {
     case 'cpu':
-      return 'CPU 使用率历史'
+      return 'CPU Usage History'
     case 'memory':
-      return '内存使用率历史'
+      return 'Memory Usage History'
     case 'disk':
-      return '磁盘使用率历史'
+      return 'Disk Usage History'
     case 'network':
-      return '网络速率历史'
+      return 'Network Speed History'
     case 'swap':
-      return 'Swap 使用率历史'
+      return 'Swap Usage History'
     default:
-      return '历史数据'
+      return 'Historical Data'
   }
 }
 
@@ -89,9 +89,9 @@ function getChartTitle(type: MetricType): string {
  */
 function getYAxisLabel(type: MetricType): string {
   if (type === 'network') {
-    return '速率'
+    return 'Speed'
   }
-  return '使用率 (%)'
+  return 'Usage (%)'
 }
 
 /**
@@ -157,19 +157,19 @@ function CustomTooltip({ active, payload, label, type }: any) {
         <>
           <div className="flex items-center gap-2 text-sm">
             <div className="w-3 h-3 rounded-full bg-primary" />
-            <span className="text-foreground-secondary">上行:</span>
+            <span className="text-foreground-secondary">Upload:</span>
             <span className="font-semibold">{formatSpeed(payload?.[0]?.value ?? 0)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm mt-1">
             <div className="w-3 h-3 rounded-full bg-success" />
-            <span className="text-foreground-secondary">下行:</span>
+            <span className="text-foreground-secondary">Download:</span>
             <span className="font-semibold">{formatSpeed(payload?.[1]?.value ?? 0)}</span>
           </div>
         </>
       ) : (
         <div className="flex items-center gap-2 text-sm">
           <div className="w-3 h-3 rounded-full bg-primary" />
-          <span className="text-foreground-secondary">使用率:</span>
+          <span className="text-foreground-secondary">Usage:</span>
           <span className="font-semibold">{payload?.[0]?.value?.toFixed(1) ?? 0}%</span>
         </div>
       )}
@@ -207,7 +207,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
         )}
       >
         <div className="text-center">
-          <p className="text-foreground-secondary text-sm">暂无历史数据</p>
+          <p className="text-foreground-secondary text-sm">No historical data available</p>
         </div>
       </motion.div>
     )
@@ -277,7 +277,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
               <Line
                 type="monotone"
                 dataKey="upload"
-                name="上行"
+                name="Upload"
                 stroke="rgb(var(--primary))"
                 strokeWidth={2}
                 dot={false}
@@ -286,7 +286,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
               <Line
                 type="monotone"
                 dataKey="download"
-                name="下行"
+                name="Download"
                 stroke="rgb(var(--success))"
                 strokeWidth={2}
                 dot={false}
@@ -309,3 +309,11 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
     </motion.div>
   )
 }
+
+
+
+
+
+
+
+

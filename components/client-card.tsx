@@ -241,7 +241,7 @@ function NetworkLineChart({
   // Generate mock history data if not provided (for preview)
   const chartData = history
     ? history.slice(-20).map((h) => ({
-        time: new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(h.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         upload: h.upload,
         download: h.download,
       }))
@@ -290,7 +290,7 @@ function NetworkLineChart({
             stroke="rgb(var(--primary))"
             strokeWidth={2}
             dot={false}
-            name="上行"
+            name="Upload"
           />
           <Line
             type="monotone"
@@ -298,7 +298,7 @@ function NetworkLineChart({
             stroke="rgb(var(--success))"
             strokeWidth={2}
             dot={false}
-            name="下行"
+            name="Download"
           />
         </LineChart>
       </ResponsiveContainer>
@@ -407,7 +407,7 @@ export const ClientCard = memo(
                   : 'bg-foreground-secondary/10 text-foreground-secondary'
               )}
             >
-              {isOnline ? '在线' : '离线'}
+              {isOnline ? 'Online' : 'Offline'}
             </span>
           </div>
         </div>
@@ -503,7 +503,7 @@ export const ClientCard = memo(
         <div className="border-t border-border pt-3 mt-4">
           <div className="flex items-center justify-between text-xs text-foreground-secondary">
             <span>Last updated</span>
-            <span>{new Date(client.lastUpdate).toLocaleTimeString('zh-CN')}</span>
+            <span>{new Date(client.lastUpdate).toLocaleTimeString('en-US')}</span>
           </div>
         </div>
       </motion.div>
@@ -522,3 +522,7 @@ export const ClientCard = memo(
     );
   }
 );
+
+
+
+

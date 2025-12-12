@@ -73,7 +73,7 @@ export function TagFilterExample() {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">标签和分组示例</h2>
+        <h2 className="text-2xl font-bold">Tag and Grouping Examples</h2>
         
         {/* Tag Filter */}
         <div className="p-4 bg-card rounded-lg border border-border">
@@ -87,7 +87,7 @@ export function TagFilterExample() {
         {/* Group By Selector */}
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-foreground-secondary">
-            分组方式:
+            Group By:
           </span>
           <div className="flex gap-2">
             <button
@@ -98,7 +98,7 @@ export function TagFilterExample() {
                   : 'bg-card text-foreground border border-border hover:border-primary/50'
               }`}
             >
-              按标签
+              By Tags
             </button>
             <button
               onClick={() => setGroupBy('purpose')}
@@ -108,7 +108,7 @@ export function TagFilterExample() {
                   : 'bg-card text-foreground border border-border hover:border-primary/50'
               }`}
             >
-              按用途
+              By Purpose
             </button>
             <button
               onClick={() => setGroupBy('platform')}
@@ -118,14 +118,14 @@ export function TagFilterExample() {
                   : 'bg-card text-foreground border border-border hover:border-primary/50'
               }`}
             >
-              按平台
+              By Platform
             </button>
           </div>
         </div>
 
         {/* Results Summary */}
         <div className="text-sm text-foreground-secondary">
-          显示 {filteredClients.length} / {mockClients.length} 个客户端
+          Showing {filteredClients.length} / {mockClients.length} clients
         </div>
       </div>
 
@@ -138,3 +138,8 @@ export function TagFilterExample() {
     </div>
   )
 }
+
+
+
+
+

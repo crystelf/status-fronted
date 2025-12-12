@@ -500,7 +500,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-sm text-foreground-secondary">系统</p>
+                        <p className="text-sm text-foreground-secondary">System</p>
                         <p className="font-medium">{'staticInfo' in detail ? detail.staticInfo.systemVersion : 'unknown system version'}</p>
                         <p className="text-xs text-foreground-secondary">
                           {'staticInfo' in detail ? detail.staticInfo.systemModel : 'unknown system model'}
@@ -508,7 +508,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-sm text-foreground-secondary">内存</p>
+                        <p className="text-sm text-foreground-secondary">Memory</p>
                         <p className="font-medium">
                           {('staticInfo' in detail ? (detail.staticInfo.totalMemory / 1024 ** 3).toFixed(1) : 'unknown memory')} GB
                         </p>
@@ -518,7 +518,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-sm text-foreground-secondary">磁盘</p>
+                        <p className="text-sm text-foreground-secondary">Disk</p>
                         <p className="font-medium">
                           {'staticInfo' in detail ? (detail.staticInfo.totalDisk / 1024 ** 3).toFixed(1) : 'unknown disk'} GB
                         </p>
