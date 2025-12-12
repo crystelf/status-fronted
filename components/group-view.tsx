@@ -85,14 +85,12 @@ function GroupSection({ groupName,
 clients,
 groupBy,
 onClientClick,
-index,
-key }: {
+index }: {
   groupName: string,
   clients: ClientSummary[],
   groupBy: 'tags' | 'purpose' | 'platform',
   onClientClick?: (clientId: string) => void,
-  index: number,
-  key?: string
+  index: number
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -201,3 +199,4 @@ export function GroupView({ clients, groupBy, onClientClick }: GroupViewProps) {
     </div>
   );
 }
+
