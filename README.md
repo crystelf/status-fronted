@@ -26,6 +26,11 @@ A front-end application of a real-time system monitoring platform, built on Next
 
 Create a `config.json` file in the frontend directory based on `config.example.json`:
 
+```bash
+cp config.example.json config.json
+nano config.json
+```
+
 ```json
 {
   "apiUrl": "http://localhost:7788"
@@ -118,21 +123,3 @@ The app supports three theme modes:
 3. **System**: Follow the system settings (default)
 
 Theme preferences are automatically saved to localStorage.
-
-## Color scheme
-
-### Bright color mode
-- Background: #FFFFFF, #F9FAFB
-- Foreground: #111827, #6B7280
-- Primary: #3B82F6 (Blue)
-- Success: #10B981 (green)
-- Warning: #F59E0B (yellow)
-- Danger: #EF4444 (Red)
-
-### Dark mode
-- Background: #111827, #1F2937
-- Foreground: #F9FAFB, #9CA3AF
-- Primary: #60A5FA (light blue)
-- Success: #34D399 (light green)
-- Warning: #FBBF24 (light yellow)
-- Danger: #F87171 (light red)

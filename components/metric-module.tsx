@@ -198,33 +198,36 @@ export const MetricModule = memo(function MetricModule({
         transform: 'translateZ(0)',
       }}
     >
-      {/* Header: Icon, Label, Value */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Icon className={cn('w-5 h-5', colorClass)} />
-          <span className="text-sm font-medium text-foreground-secondary">
-            {label}
-          </span>
-        </div>
+      {/* Header: Icon, Label */}
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className={cn('w-5 h-5', colorClass)} />
+        <span className="text-sm font-medium text-foreground-secondary">
+          {label}
+        </span>
+      </div>
+      
+      {/* Value and Expand Icon */}
+      <div className={cn(
+        "flex items-center justify-between mb-3",
+        // On desktop, stack value below the label for network module
+        type === 'network' && 'lg:flex-col lg:items-start lg:gap-2'
+      )}>
+        <span className={cn('text-0.7xl font-semibold', colorClass)}>
+          {formattedValue}
+        </span>
         
-        <div className="flex items-center gap-2">
-          <span className={cn('text-lg font-semibold', colorClass)}>
-            {formattedValue}
-          </span>
-          
-          {isClickable && (
-            <motion.div
-              animate={{ rotate: expanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {expanded ? (
-                <ChevronUp className="w-4 h-4 text-foreground-secondary" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-foreground-secondary" />
-              )}
-            </motion.div>
-          )}
-        </div>
+        {isClickable && (
+          <motion.div
+            animate={{ rotate: expanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className={cn(
+              // On desktop, move expand icon to the right for network module
+              type === 'network' && 'lg:self-end'
+            )}
+          >
+            <ChevronDown className="w-4 h-3 text-foreground-secondary" />
+          </motion.div>
+        )}
       </div>
       
       {/* Progress Bar (not shown for network) */}
@@ -267,4 +270,4 @@ export const MetricModule = memo(function MetricModule({
     JSON.stringify(prevProps.history) === JSON.stringify(nextProps.history)
   )
 })
-
+

@@ -59,4 +59,4 @@ export type {
 export { handleApiError, logError, ErrorType } from './error-handler';
 export type { UserFriendlyError } from './error-handler';
 export { useAllClients, useClientDetail, useClientHistory } from './use-api';
-
+

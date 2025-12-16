@@ -22,6 +22,16 @@ export function MetricDemo() {
     diskUsage: 30 + Math.random() * 20,
     networkUpload: Math.random() * 10000000, // 0-10MB/s
     networkDownload: Math.random() * 50000000, // 0-50MB/s
+    diskUsages: [
+      {
+        device: '/dev/sda1',
+        size: 1000000000000,
+        used: 300000000000 + Math.random() * 200000000000,
+        available: 700000000000 - Math.random() * 200000000000,
+        usagePercent: 30 + Math.random() * 20,
+        mountpoint: '/',
+      }
+    ],
     timestamp: Date.now() - (20 - i) * 60000, // Last 20 minutes
   }));
 

@@ -31,7 +31,14 @@ const mockClientDetail: ClientDetail = {
     totalMemory: 34359738368, // 32 GB
     totalSwap: 8589934592, // 8 GB
     totalDisk: 1099511627776, // 1 TB
-    diskType: 'SSD',
+    disks: [
+      {
+        device: '/dev/sda',
+        size: 1099511627776,
+        type: 'SSD',
+        interfaceType: 'NVMe',
+      }
+    ],
     location: '北京, 中国',
   },
   currentStatus: {
@@ -42,6 +49,16 @@ const mockClientDetail: ClientDetail = {
     diskUsage: 38.4,
     networkUpload: 5242880, // 5 MB/s
     networkDownload: 10485760, // 10 MB/s
+    diskUsages: [
+      {
+        device: '/dev/sda1',
+        size: 1099511627776,
+        used: 422212565068,
+        available: 677299062708,
+        usagePercent: 38.4,
+        mountpoint: '/',
+      }
+    ],
     timestamp: Date.now(),
   },
 };
@@ -64,7 +81,20 @@ const mockOfflineClient: ClientDetail = {
     totalMemory: 137438953472, // 128 GB
     totalSwap: 17179869184, // 16 GB
     totalDisk: 2199023255552, // 2 TB
-    diskType: 'NVMe',
+    disks: [
+      {
+        device: 'C:',
+        size: 1099511627776,
+        type: 'NVMe',
+        interfaceType: 'NVMe',
+      },
+      {
+        device: 'D:',
+        size: 1099511627776,
+        type: 'NVMe',
+        interfaceType: 'NVMe',
+      }
+    ],
     location: '上海, 中国',
   },
   currentStatus: {
@@ -75,6 +105,24 @@ const mockOfflineClient: ClientDetail = {
     diskUsage: 0,
     networkUpload: 0,
     networkDownload: 0,
+    diskUsages: [
+      {
+        device: 'C:',
+        size: 1099511627776,
+        used: 549755813888,
+        available: 549755813888,
+        usagePercent: 50,
+        mountpoint: 'C:',
+      },
+      {
+        device: 'D:',
+        size: 1099511627776,
+        used: 219902325555,
+        available: 879609302221,
+        usagePercent: 20,
+        mountpoint: 'D:',
+      }
+    ],
     timestamp: Date.now() - 3600000,
   },
 };
@@ -97,7 +145,14 @@ const mockMacClient: ClientDetail = {
     totalMemory: 34359738368, // 32 GB
     totalSwap: 0,
     totalDisk: 1099511627776, // 1 TB
-    diskType: 'SSD',
+    disks: [
+      {
+        device: '/dev/disk1',
+        size: 1099511627776,
+        type: 'SSD',
+        interfaceType: 'NVMe',
+      }
+    ],
     location: '深圳, 中国',
   },
   currentStatus: {
@@ -108,6 +163,16 @@ const mockMacClient: ClientDetail = {
     diskUsage: 55.2,
     networkUpload: 1048576, // 1 MB/s
     networkDownload: 2097152, // 2 MB/s
+    diskUsages: [
+      {
+        device: '/dev/disk1s1',
+        size: 1099511627776,
+        used: 605508094468,
+        available: 493003532308,
+        usagePercent: 55.2,
+        mountpoint: '/',
+      }
+    ],
     timestamp: Date.now(),
   },
 };

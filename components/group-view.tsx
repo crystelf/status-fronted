@@ -171,9 +171,9 @@ export function GroupView({ clients, groupBy, onClientClick }: GroupViewProps) {
 
   // Sort groups by name
   const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
-    if (a[0].startsWith('未')) return 1;
-    if (b[0].startsWith('未')) return -1;
-    return a[0].localeCompare(b[0], 'zh-CN');
+    if (a[0].startsWith('Uncategorized')) return 1;
+    if (b[0].startsWith('Uncategorized')) return -1;
+    return a[0].localeCompare(b[0], 'en-US');
   });
 
   if (sortedGroups.length === 0) {

@@ -57,7 +57,7 @@ The `GroupView` component displays clients grouped by tags, purpose, or platform
 - Client count per group
 - Smooth expand/collapse animations
 - Responsive grid layout within groups
-- Clients without tags/purpose are grouped under "未分类"/"未指定用途"
+- Clients without tags/purpose are grouped under "Uncategorized"/"Unspecified Purpose"
 
 **Grouping Behavior**:
 - **By Tags**: Clients can appear in multiple groups if they have multiple tags

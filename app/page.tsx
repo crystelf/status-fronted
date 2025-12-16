@@ -16,6 +16,7 @@ import { Loader2, Layers, Grid3x3, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MetricModule } from '@/components/metric-module';
 import { HistoryChart } from '@/components/history-chart';
+import { MultiDiskDetail } from '@/components/multi-disk-detail';
 
 /**
  * View mode type
@@ -523,7 +524,10 @@ export default function DashboardPage() {
                           {'staticInfo' in detail ? (detail.staticInfo.totalDisk / 1024 ** 3).toFixed(1) : 'unknown disk'} GB
                         </p>
                         <p className="text-xs text-foreground-secondary">
-                          {'staticInfo' in detail ? detail.staticInfo.diskType : 'unknown disk type'}
+                          {'staticInfo' in detail && detail.staticInfo.disks ? 
+                            `${detail.staticInfo.disks.length} disk(s)` : 
+                            'unknown disk count'
+                          }
                         </p>
                       </div>
                     </div>
@@ -572,15 +576,24 @@ export default function DashboardPage() {
                       {expandedMetric && clientHistory && clientHistory.length > 0 && (
                         <motion.div
                           key={expandedMetric}
-                          variants={slideVariants}
+                          className="w-full"
                           initial="hidden"
                           animate="visible"
                           exit="exit"
+                          variants={slideVariants}
+                          transition={smoothTransition}
                           style={{
                             willChange: 'transform, opacity',
                           }}
                         >
-                          <HistoryChart type={expandedMetric as any} data={clientHistory} />
+                          {expandedMetric === 'disk' ? (
+                            <MultiDiskDetail
+                              disks={'staticInfo' in detail ? detail.staticInfo.disks || [] : []}
+                              diskUsages={'currentStatus' in detail ? detail.currentStatus.diskUsages || [] : []}
+                            />
+                          ) : (
+                            <HistoryChart type={expandedMetric as any} data={clientHistory} />
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>

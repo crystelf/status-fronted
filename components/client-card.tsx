@@ -180,48 +180,69 @@ function UsageDonut({
 }
 
 /**
- * Disk usage progress bar
+ * Disk usage progress bar for multiple disks
  */
-function DiskProgressBar({
-  label,
-  value,
-  totalBytes,
-  usedBytes,
+function MultiDiskUsage({
+  diskUsages,
 }: {
-  label: string;
-  value: number;
-  totalBytes: number;
-  usedBytes: number;
+  diskUsages: Array<{
+    device: string;
+    size: number;
+    used: number;
+    available: number;
+    usagePercent: number;
+    mountpoint?: string;
+  }>;
 }) {
-  const [hovered, setHovered] = useState(false);
-  const usedColor = getUsageColor(value);
-  const usedGB = (usedBytes / 1024 ** 3).toFixed(1);
-  const totalGB = (totalBytes / 1024 ** 3).toFixed(1);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // Sort disks by usage percentage (highest first)
+  const sortedDisks = [...diskUsages].sort((a, b) => b.usagePercent - a.usagePercent);
 
   return (
-    <div 
-      className="space-y-1.5"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold">{label}</span>
-        <span className="text-foreground-secondary">
-          {usedGB}g / {totalGB}g
-        </span>
-      </div>
-      <div className="h-2.5 w-full bg-gray-600 rounded-full overflow-hidden">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ backgroundColor: usedColor }}
-          initial={{ width: 0 }}
-          animate={{ 
-            width: `${value}%`,
-            filter: hovered ? 'brightness(1.2)' : 'brightness(1)'
-          }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        />
-      </div>
+    <div className="space-y-2">
+      <h4 className="text-xs font-semibold text-foreground">Disk Usage</h4>
+      {sortedDisks.map((disk, index) => {
+        const usedColor = getUsageColor(disk.usagePercent);
+        const usedGB = (disk.used / 1024 ** 3).toFixed(1);
+        const totalGB = (disk.size / 1024 ** 3).toFixed(1);
+        
+        // Format device name for display
+        let displayName = disk.device;
+        if (disk.mountpoint && disk.mountpoint !== disk.device) {
+          displayName = `${disk.device} (${disk.mountpoint})`;
+        }
+
+        return (
+          <div 
+            key={disk.device}
+            className="space-y-1.5"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold truncate max-w-[60%]" title={displayName}>
+                {displayName}
+              </span>
+              <span className="text-foreground-secondary">
+                {usedGB}g / {totalGB}g
+              </span>
+            </div>
+            <div className="h-2.5 w-full bg-gray-600 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: usedColor }}
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: `${disk.usagePercent}%`,
+                  filter: hoveredIndex === index ? 'brightness(1.2)' : 'brightness(1)'
+                }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -478,15 +499,10 @@ export const ClientCard = memo(
               />
             </div>
 
-            {/* Disk Section - Progress Bar */}
-            {diskInfo && (
+            {/* Disk Section - Multiple Disks */}
+            {status.diskUsages && status.diskUsages.length > 0 && (
               <div className="mb-3">
-                <DiskProgressBar
-                  label="Disk"
-                  value={status.diskUsage}
-                  totalBytes={staticInfo!.totalDisk}
-                  usedBytes={staticInfo!.totalDisk * status.diskUsage / 100}
-                />
+                <MultiDiskUsage diskUsages={status.diskUsages} />
               </div>
             )}
           </>
