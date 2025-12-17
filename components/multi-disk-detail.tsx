@@ -51,8 +51,8 @@ export const MultiDiskDetail = memo(function MultiDiskDetail({
   diskUsages,
   className
 }: MultiDiskDetailProps) {
-  // Sort disks by usage percentage (highest first)
-  const sortedDisks = [...diskUsages].sort((a, b) => b.usagePercent - a.usagePercent);
+  // Sort disks by device name (A-Z order)
+  const sortedDisks = [...diskUsages].sort((a, b) => a.device.localeCompare(b.device));
 
   return (
     <div className={cn('space-y-4', className)}>

@@ -189,8 +189,8 @@ function MultiDiskUsage({
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Sort disks by usage percentage (highest first)
-  const sortedDisks = [...diskUsages].sort((a, b) => b.usagePercent - a.usagePercent);
+  // Sort disks by device name (A-Z order)
+  const sortedDisks = [...diskUsages].sort((a, b) => a.device.localeCompare(b.device));
 
   return (
     <div className="space-y-2">
