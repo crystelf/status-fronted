@@ -262,6 +262,7 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
           <Tooltip 
             content={<CustomTooltip type={type} />}
             cursor={{ stroke: 'rgb(var(--border))', strokeWidth: 1 }}
+            animationDuration={0}
           />
           
           {/* Network chart: dual curves for upload and download */}

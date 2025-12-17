@@ -302,6 +302,7 @@ function NetworkLineChart({
               border: '1px solid rgb(var(--border))',
               borderRadius: 8,
             }}
+            animationDuration={0}
           />
           <Line
             type="monotone"
