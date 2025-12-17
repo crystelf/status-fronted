@@ -36,6 +36,13 @@ function getUsageColor(value: number): string {
 }
 
 /**
+ * Get free color - visible in both light and dark mode
+ */
+function getFreeColor(): string {
+  return 'hsl(var(--border-h) var(--border-s) calc(var(--border-l) * 1.3))';
+}
+
+/**
  * MultiDiskDetail Component
  * Displays detailed information for multiple disks
  */
@@ -89,7 +96,7 @@ export const MultiDiskDetail = memo(function MultiDiskDetail({
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-2 w-full bg-gray-600 rounded-full overflow-hidden">
+                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: getFreeColor() }}>
                   <motion.div
                     className="h-full rounded-full"
                     style={{ backgroundColor: usedColor }}

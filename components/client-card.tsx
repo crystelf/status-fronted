@@ -2,14 +2,7 @@
 
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Circle,
-  Tag,
-  Activity,
-  Server,
-  Monitor,
-  Smartphone,
-} from 'lucide-react';
+import { Circle, Tag, Activity, Server, Monitor, Smartphone } from 'lucide-react';
 import {
   Cell,
   Line,
@@ -68,7 +61,7 @@ function getPlatformName(platform: string, systemVersion?: string): string {
 }
 
 /**
- * Format bytes to human readable format
+ * Format bytes to human-readable format
  */
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -123,7 +116,7 @@ function UsageDonut({
 
   const data = [
     { name: 'used', value: safeValue, color: usedColor },
-    { name: 'free', value: freeValue, color: 'rgb(var(--border))' }, // Adaptive color for visibility in both modes
+    { name: 'free', value: freeValue, color: getFreeColor() }, // Adaptive color for visibility in both modes
   ];
 
   return (
@@ -206,7 +199,7 @@ function MultiDiskUsage({
         const usedColor = getUsageColor(disk.usagePercent);
         const usedGB = (disk.used / 1024 ** 3).toFixed(1);
         const totalGB = (disk.size / 1024 ** 3).toFixed(1);
-        
+
         // Format device name for display
         let displayName = disk.device;
         if (disk.mountpoint && disk.mountpoint !== disk.device) {
@@ -214,7 +207,7 @@ function MultiDiskUsage({
         }
 
         return (
-          <div 
+          <div
             key={disk.device}
             className="space-y-1.5"
             onMouseEnter={() => setHoveredIndex(index)}
@@ -228,14 +221,14 @@ function MultiDiskUsage({
                 {usedGB}g / {totalGB}g
               </span>
             </div>
-            <div className="h-2.5 w-full bg-gray-600 rounded-full overflow-hidden">
+            <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: getFreeColor() }}>
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: usedColor }}
                 initial={{ width: 0 }}
-                animate={{ 
+                animate={{
                   width: `${disk.usagePercent}%`,
-                  filter: hoveredIndex === index ? 'brightness(1.2)' : 'brightness(1)'
+                  filter: hoveredIndex === index ? 'brightness(1.2)' : 'brightness(1)',
                 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
               />
@@ -262,7 +255,10 @@ function NetworkLineChart({
   // Generate mock history data if not provided (for preview)
   const chartData = history
     ? history.slice(-20).map((h) => ({
-        time: new Date(h.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(h.timestamp).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         upload: h.upload,
         download: h.download,
       }))
@@ -272,16 +268,18 @@ function NetworkLineChart({
         download: (download || 0) * (0.8 + Math.random() * 0.4),
       }));
 
-  const maxValue = Math.max(
-    ...chartData.map((d) => Math.max(d.upload, d.download)),
-    1
-  );
+  const maxValue = Math.max(...chartData.map((d) => Math.max(d.upload, d.download)), 1);
 
   return (
     <div className="h-32 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgb(var(--border))" opacity={0.3} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="rgb(var(--border))"
+            opacity={0.3}
+          />
           <XAxis
             dataKey="time"
             tickLine={false}
@@ -342,30 +340,37 @@ export const ClientCard = memo(
   function ClientCard({ client, onClick, index = 0 }: ClientCardProps) {
     const isOnline = client.status === 'online';
     const hasDetailedInfo = isClientDetail(client);
-    const status = hasDetailedInfo ? 'currentStatus' in client ? client.currentStatus : undefined : undefined;
-    const staticInfo = hasDetailedInfo ? 'staticInfo' in client ? client.staticInfo : undefined : undefined;
+    const status = hasDetailedInfo
+      ? 'currentStatus' in client
+        ? client.currentStatus
+        : undefined
+      : undefined;
+    const staticInfo = hasDetailedInfo
+      ? 'staticInfo' in client
+        ? client.staticInfo
+        : undefined
+      : undefined;
 
     const PlatformIcon = getPlatformIcon(client.platform);
-    const platformName = getPlatformName(
-      client.platform,
-      staticInfo?.systemVersion
-    );
+    const platformName = getPlatformName(client.platform, staticInfo?.systemVersion);
 
     // Calculate memory info
-    const memoryInfo = staticInfo && status
-      ? {
-          used: (staticInfo.totalMemory * status.memoryUsage / 100) / 1024 ** 3,
-          total: staticInfo.totalMemory / 1024 ** 3,
-        }
-      : undefined;
+    const memoryInfo =
+      staticInfo && status
+        ? {
+            used: (staticInfo.totalMemory * status.memoryUsage) / 100 / 1024 ** 3,
+            total: staticInfo.totalMemory / 1024 ** 3,
+          }
+        : undefined;
 
     // Calculate disk info
-    const diskInfo = staticInfo && status
-      ? {
-          used: (staticInfo.totalDisk * status.diskUsage / 100) / 1024 ** 3,
-          total: staticInfo.totalDisk / 1024 ** 3,
-        }
-      : undefined;
+    const diskInfo =
+      staticInfo && status
+        ? {
+            used: (staticInfo.totalDisk * status.diskUsage) / 100 / 1024 ** 3,
+            total: staticInfo.totalDisk / 1024 ** 3,
+          }
+        : undefined;
 
     return (
       <motion.div
@@ -457,11 +462,7 @@ export const ClientCard = memo(
                   label="CPU"
                   value={status.cpuUsage}
                   usedColor={getUsageColor(status.cpuUsage)}
-                  detail={
-                    staticInfo
-                      ? `${staticInfo.cpuCores}C`
-                      : undefined
-                  }
+                  detail={staticInfo ? `${staticInfo.cpuCores}C` : undefined}
                 />
                 <UsageDonut
                   label="Memory"
@@ -493,10 +494,7 @@ export const ClientCard = memo(
                   </div>
                 </div>
               </div>
-              <NetworkLineChart
-                upload={status.networkUpload}
-                download={status.networkDownload}
-              />
+              <NetworkLineChart upload={status.networkUpload} download={status.networkDownload} />
             </div>
 
             {/* Disk Section - Multiple Disks */}
@@ -538,7 +536,3 @@ export const ClientCard = memo(
     );
   }
 );
-
-
-
-
