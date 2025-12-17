@@ -91,7 +91,7 @@ function getUsageColor(value: number): string {
  * Get free color - visible in both light and dark mode
  */
 function getFreeColor(): string {
-  return 'hsl(var(--border-h) var(--border-s) calc(var(--border-l) * 1.3))';
+  return 'rgb(var(--free-color))';
 }
 
 /**

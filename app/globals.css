@@ -18,6 +18,7 @@
     --card: 255 255 255;
     --card-hover: 248 250 252; /* Slate 50 */
     --border: 226 232 240; /* #E2E8F0 - Slate 200 */
+    --free-color: 241 245 249; /* #F1F5F9 - Slate 100 - Light gray for free space in light mode */
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   }
 
@@ -36,6 +37,7 @@
     --card: 31 41 55;
     --card-hover: 31 41 55;
     --border: 75 85 99; /* #4B5563 - gray-600 for better visibility */
+    --free-color: 75 85 99; /* #4B5563 - Gray 600 - Gray for free space in dark mode */
     --shadow: 0 0 0;
   }
 }
