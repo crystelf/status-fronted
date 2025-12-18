@@ -56,15 +56,25 @@ function formatSpeed(bytesPerSecond: number): string {
 }
 
 /**
- * Format timestamp to time string
+ * Format timestamp to time string based on time range
  */
-function formatTime(timestamp: number): string {
+function formatTime(timestamp: number, timeRange: string): string {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  
+  // Short time ranges (hours): show only hour and minute
+  if (timeRange === '4h' || timeRange === '8h' || timeRange === '12h' || timeRange === '24h') {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+  // Long time ranges (days or more): show month and day
+  else {
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+    });
+  }
 }
 
 /**
@@ -100,11 +110,11 @@ function getYAxisLabel(type: MetricType): string {
 /**
  * Transform data for chart based on metric type
  */
-function transformData(type: MetricType, data: DynamicSystemStatus[]) {
+function transformData(type: MetricType, data: DynamicSystemStatus[], timeRange: string) {
   return data.map((status) => {
     const baseData = {
       timestamp: status.timestamp,
-      time: formatTime(status.timestamp),
+      time: formatTime(status.timestamp, timeRange),
     };
 
     switch (type) {
@@ -224,7 +234,7 @@ export const HistoryChart = React.memo(function HistoryChart({
     return item.timestamp >= startTime;
   });
 
-  const chartData = transformData(type, filteredData);
+  const chartData = transformData(type, filteredData, timeRange);
   const title = getChartTitle(type);
   const yAxisLabel = getYAxisLabel(type);
 
