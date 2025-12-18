@@ -178,115 +178,133 @@ function CustomTooltip({ active, payload, label, type }: any) {
 /**
  * HistoryChart Component
  * Displays historical trend data for monitoring metrics
+ * Requirements: 5.4, 9.4, 9.5, 9.6
  *
  * Features:
  * - Uses Recharts library for smooth animations
  * - Network chart displays dual curves (upload + download)
  * - Responsive chart sizing
  * - Smooth data transition animations
- * - Stable layout during data updates
+ * - Elastic animation on chart load
  */
+// Animation variants for chart container
 export const HistoryChart = React.memo(function HistoryChart({
   type,
   data,
   className,
 }: HistoryChartProps) {
-  // Memoize transformed data to avoid unnecessary recalculations
-  const chartData = React.useMemo(() => {
-    return transformData(type, data);
-  }, [type, data]);
-
+  const chartData = transformData(type, data);
   const title = getChartTitle(type);
   const yAxisLabel = getYAxisLabel(type);
 
+  // If no data, show empty state
+  if (!data || data.length === 0) {
+    return (
+      <div
+        className={cn(
+          'rounded-lg border border-border bg-card p-6',
+          'flex items-center justify-center',
+          'min-h-[300px]',
+          className
+        )}
+      >
+        <div className="text-center">
+          <p className="text-foreground-secondary text-sm">No historical data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-6', className)}>
+    <motion.div
+      className={cn('rounded-lg border border-border bg-card p-6', className)}
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{
+        duration: 0.5,
+        ease: [0.6, -0.05, 0.01, 0.99], // Elastic easing
+        height: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] },
+      }}
+    >
       {/* Chart Title */}
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
 
-      {/* Stable Chart Container - maintains size during data updates */}
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" opacity={0.3} />
+      {/* Chart Container */}
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" opacity={0.3} />
 
-            <XAxis
-              dataKey="time"
-              stroke="rgb(var(--foreground-secondary))"
-              tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
-              tickLine={{ stroke: 'rgb(var(--border))' }}
-              // Keep X-axis stable during data updates
-              allowDuplicatedCategory={false}
-            />
+          <XAxis
+            dataKey="time"
+            stroke="rgb(var(--foreground-secondary))"
+            tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
+            tickLine={{ stroke: 'rgb(var(--border))' }}
+          />
 
-            <YAxis
-              stroke="rgb(var(--foreground-secondary))"
-              tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
-              tickLine={{ stroke: 'rgb(var(--border))' }}
-              label={{
-                value: yAxisLabel,
-                angle: -90,
-                position: 'insideLeft',
-                style: { fill: 'rgb(var(--foreground-secondary))', fontSize: 12 },
-              }}
-              tickFormatter={type === 'network' ? formatBytes : undefined}
-            />
+          <YAxis
+            stroke="rgb(var(--foreground-secondary))"
+            tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
+            tickLine={{ stroke: 'rgb(var(--border))' }}
+            label={{
+              value: yAxisLabel,
+              angle: -90,
+              position: 'insideLeft',
+              style: { fill: 'rgb(var(--foreground-secondary))', fontSize: 12 },
+            }}
+            tickFormatter={type === 'network' ? formatBytes : undefined}
+          />
 
-            <Tooltip
-              content={<CustomTooltip type={type} />}
-              cursor={{ stroke: 'rgb(var(--border))', strokeWidth: 1 }}
-              animationDuration={0}
-            />
+          <Tooltip
+            content={<CustomTooltip type={type} />}
+            cursor={{ stroke: 'rgb(var(--border))', strokeWidth: 1 }}
+            animationDuration={0}
+          />
 
-            {/* Network chart: dual curves for upload and download */}
-            {type === 'network' ? (
-              <>
-                <Legend
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="line"
-                  formatter={(value) => {
-                    return <span style={{ color: 'rgb(var(--foreground))' }}>{value}</span>;
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="upload"
-                  name="Upload"
-                  stroke="rgb(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={true}
-                  animationDuration={300}
-                  animationEasing="ease-in-out"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="download"
-                  name="Download"
-                  stroke="rgb(var(--success))"
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={true}
-                  animationDuration={300}
-                  animationEasing="ease-in-out"
-                />
-              </>
-            ) : (
-              // Single curve for other metrics
+          {/* Network chart: dual curves for upload and download */}
+          {type === 'network' ? (
+            <>
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="line"
+                formatter={(value) => {
+                  return <span style={{ color: 'rgb(var(--foreground))' }}>{value}</span>;
+                }}
+              />
               <Line
                 type="monotone"
-                dataKey="value"
+                dataKey="upload"
+                name="Upload"
                 stroke="rgb(var(--primary))"
                 strokeWidth={2}
                 dot={false}
                 isAnimationActive={true}
-                animationDuration={300}
-                animationEasing="ease-in-out"
+                animationDuration={400}
               />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+              <Line
+                type="monotone"
+                dataKey="download"
+                name="Download"
+                stroke="rgb(var(--success))"
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={true}
+                animationDuration={400}
+              />
+            </>
+          ) : (
+            // Single curve for other metrics
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="rgb(var(--primary))"
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={true}
+              animationDuration={400}
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </motion.div>
   );
 });

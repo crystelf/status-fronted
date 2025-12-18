@@ -628,52 +628,50 @@ export default function DashboardPage() {
                     </div>
 
                     {/* History Chart */}
-                      <AnimatePresence mode="wait">
-                        {expandedMetric && (
-                          <motion.div
-                            key={`${expandedClientId}-${expandedMetric}`}
-                            className="w-full"
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            variants={slideVariants}
-                            transition={smoothTransition}
-                            style={{
-                              willChange: 'transform, opacity',
-                            }}
-                          >
-                            {/* Time Range Selector */}
-                            <div className="flex items-center justify-end mb-4">
-                              <label className="text-sm text-foreground-secondary mr-2 flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                              </label>
-                              <div className="relative min-w-[120px]">
-                                {/* Dropdown state management */}
-                                <TimeRangeSelector
-                                  availableTimeRanges={availableTimeRanges}
-                                  selectedRange={timeRange}
-                                  onRangeChange={handleTimeRangeChange}
-                                  clientId={expandedClientId}
-                                />
-                              </div>
-                            </div>
-                            
-                            {expandedMetric === 'disk' ? (
-                              <MultiDiskDetail
-                                disks={'staticInfo' in detail ? detail.staticInfo.disks || [] : []}
-                                diskUsages={'currentStatus' in detail ? detail.currentStatus.diskUsages || [] : []}
-                              />
-                            ) : clientHistory ? (
-                              <HistoryChart type={expandedMetric as any} data={clientHistory} />
-                            ) : (
-                              // Show loading state while history data is fetching
-                              <div className="rounded-lg border border-border bg-card p-6 flex items-center justify-center min-h-[300px]">
-                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                              </div>
-                            )}
-                          </motion.div>
+                    {expandedMetric && (
+                      <motion.div
+                        key={`${expandedClientId}-${expandedMetric}`}
+                        className="w-full"
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={slideVariants}
+                        transition={smoothTransition}
+                        style={{
+                          willChange: 'transform, opacity',
+                        }}
+                      >
+                        {/* Time Range Selector */}
+                        <div className="flex items-center justify-end mb-4">
+                          <label className="text-sm text-foreground-secondary mr-2 flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                          </label>
+                          <div className="relative min-w-[120px]">
+                            {/* Dropdown state management */}
+                            <TimeRangeSelector
+                              availableTimeRanges={availableTimeRanges}
+                              selectedRange={timeRange}
+                              onRangeChange={handleTimeRangeChange}
+                              clientId={expandedClientId}
+                            />
+                          </div>
+                        </div>
+                        
+                        {expandedMetric === 'disk' ? (
+                          <MultiDiskDetail
+                            disks={'staticInfo' in detail ? detail.staticInfo.disks || [] : []}
+                            diskUsages={'currentStatus' in detail ? detail.currentStatus.diskUsages || [] : []}
+                          />
+                        ) : (
+                          // Always render HistoryChart, even with empty data
+                          // This maintains stable layout and allows interactions
+                          <HistoryChart 
+                            type={expandedMetric as any} 
+                            data={clientHistory || []} 
+                          />
                         )}
-                      </AnimatePresence>
+                      </motion.div>
+                    )}
                   </div>
                 </motion.div>
               </div>
