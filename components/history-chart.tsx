@@ -23,6 +23,7 @@ export interface HistoryChartProps {
   type: MetricType;
   data: DynamicSystemStatus[];
   className?: string;
+  timeRange?: string;
 }
 
 /**
@@ -176,29 +177,59 @@ function CustomTooltip({ active, payload, label, type }: any) {
 }
 
 /**
+ * Calculate start time based on time range
+ */
+function calculateStartTime(range: string): number {
+  const endTime = Date.now();
+  switch (range) {
+    case '4h':
+      return endTime - 4 * 60 * 60 * 1000;
+    case '8h':
+      return endTime - 8 * 60 * 60 * 1000;
+    case '12h':
+      return endTime - 12 * 60 * 60 * 1000;
+    case '24h':
+      return endTime - 24 * 60 * 60 * 1000;
+    case '7days':
+      return endTime - 7 * 24 * 60 * 60 * 1000;
+    case '30days':
+      return endTime - 30 * 24 * 60 * 60 * 1000;
+    case '60days':
+      return endTime - 60 * 24 * 60 * 60 * 1000;
+    case '90days':
+      return endTime - 90 * 24 * 60 * 60 * 1000;
+    case '180days':
+      return endTime - 180 * 24 * 60 * 60 * 1000;
+    case '365days':
+      return endTime - 365 * 24 * 60 * 60 * 1000;
+    default:
+      return endTime - 4 * 60 * 60 * 1000;
+  }
+}
+
+/**
  * HistoryChart Component
  * Displays historical trend data for monitoring metrics
- * Requirements: 5.4, 9.4, 9.5, 9.6
- *
- * Features:
- * - Uses Recharts library for smooth animations
- * - Network chart displays dual curves (upload + download)
- * - Responsive chart sizing
- * - Smooth data transition animations
- * - Elastic animation on chart load
  */
 // Animation variants for chart container
 export const HistoryChart = React.memo(function HistoryChart({
   type,
   data,
   className,
+  timeRange = '4h',
 }: HistoryChartProps) {
-  const chartData = transformData(type, data);
+  // Filter data based on time range
+  const filteredData = data.filter((item) => {
+    const startTime = calculateStartTime(timeRange);
+    return item.timestamp >= startTime;
+  });
+
+  const chartData = transformData(type, filteredData);
   const title = getChartTitle(type);
   const yAxisLabel = getYAxisLabel(type);
 
   // If no data, show empty state
-  if (!data || data.length === 0) {
+  if (!filteredData || filteredData.length === 0) {
     return (
       <div
         className={cn(

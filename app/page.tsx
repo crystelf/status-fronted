@@ -668,6 +668,7 @@ export default function DashboardPage() {
                           <HistoryChart 
                             type={expandedMetric as any} 
                             data={clientHistory || []} 
+                            timeRange={timeRange}
                           />
                         )}
                       </motion.div>
