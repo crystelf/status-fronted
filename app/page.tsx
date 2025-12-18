@@ -127,18 +127,15 @@ export default function DashboardPage() {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [clientDetailsMap, setClientDetailsMap] = useState<Map<string, ClientDetail>>(new Map());
-  const [timeRange, setTimeRange] = useState<string>('4h');
+  const [timeRange, setTimeRange] = useState<string>('1h');
   const [availableTimeRanges, setAvailableTimeRanges] = useState<Array<{ value: string; label: string }>>([
+    { value: '1h', label: '1小时' },
     { value: '4h', label: '4小时' },
     { value: '8h', label: '8小时' },
     { value: '12h', label: '12小时' },
     { value: '24h', label: '24小时' },
     { value: '7days', label: '7天' },
-    { value: '30days', label: '30天' },
-    { value: '60days', label: '60天' },
-    { value: '90days', label: '90天' },
-    { value: '180days', label: '180天' },
-    { value: '365days', label: '1年' }
+    { value: '30days', label: '30天' }
   ]);
   
   // Track pending requests to avoid duplicate requests
@@ -187,6 +184,8 @@ export default function DashboardPage() {
   const calculateStartTime = (range: string): number => {
     const endTime = Date.now();
     switch (range) {
+      case '1h':
+        return endTime - 1 * 60 * 60 * 1000;
       case '4h':
         return endTime - 4 * 60 * 60 * 1000;
       case '8h':
@@ -199,16 +198,8 @@ export default function DashboardPage() {
         return endTime - 7 * 24 * 60 * 60 * 1000;
       case '30days':
         return endTime - 30 * 24 * 60 * 60 * 1000;
-      case '60days':
-        return endTime - 60 * 24 * 60 * 60 * 1000;
-      case '90days':
-        return endTime - 90 * 24 * 60 * 60 * 1000;
-      case '180days':
-        return endTime - 180 * 24 * 60 * 60 * 1000;
-      case '365days':
-        return endTime - 365 * 24 * 60 * 60 * 1000;
       default:
-        return endTime - 4 * 60 * 60 * 1000;
+        return endTime - 1 * 60 * 60 * 1000;
     }
   };
 

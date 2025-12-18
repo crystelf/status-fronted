@@ -62,7 +62,7 @@ function formatTime(timestamp: number, timeRange: string): string {
   const date = new Date(timestamp);
   
   // Short time ranges (hours): show only hour and minute
-  if (timeRange === '4h' || timeRange === '8h' || timeRange === '12h' || timeRange === '24h') {
+  if (timeRange === '1h' || timeRange === '4h' || timeRange === '8h' || timeRange === '12h' || timeRange === '24h') {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
@@ -192,6 +192,8 @@ function CustomTooltip({ active, payload, label, type }: any) {
 function calculateStartTime(range: string): number {
   const endTime = Date.now();
   switch (range) {
+    case '1h':
+      return endTime - 1 * 60 * 60 * 1000;
     case '4h':
       return endTime - 4 * 60 * 60 * 1000;
     case '8h':
@@ -204,16 +206,8 @@ function calculateStartTime(range: string): number {
       return endTime - 7 * 24 * 60 * 60 * 1000;
     case '30days':
       return endTime - 30 * 24 * 60 * 60 * 1000;
-    case '60days':
-      return endTime - 60 * 24 * 60 * 60 * 1000;
-    case '90days':
-      return endTime - 90 * 24 * 60 * 60 * 1000;
-    case '180days':
-      return endTime - 180 * 24 * 60 * 60 * 1000;
-    case '365days':
-      return endTime - 365 * 24 * 60 * 60 * 1000;
     default:
-      return endTime - 4 * 60 * 60 * 1000;
+      return endTime - 1 * 60 * 60 * 1000;
   }
 }
 
