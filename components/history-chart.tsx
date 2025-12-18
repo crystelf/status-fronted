@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
+import React from 'react';
+import { motion } from 'framer-motion';
 import {
   LineChart,
   Line,
@@ -9,59 +10,60 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
-} from 'recharts'
-import { DynamicSystemStatus } from '@/lib/api-client'
-import { cn } from '@/lib/utils'
-import { MetricType } from './metric-module'
+  Legend,
+} from 'recharts';
+import { DynamicSystemStatus } from '@/lib/api-client';
+import { cn } from '@/lib/utils';
+import { MetricType } from './metric-module';
 
 /**
  * Props for HistoryChart component
  */
 export interface HistoryChartProps {
-  type: MetricType
-  data: DynamicSystemStatus[]
-  className?: string
+  type: MetricType;
+  data: DynamicSystemStatus[];
+  className?: string;
 }
 
 /**
- * Format bytes to human readable format
+ * Format bytes to human-readable format
  */
 function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return '0 B'
-  if (bytes === 0) return '0 B'
-  
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  
-  // Handle small values
-  if (bytes < 1) return `${bytes.toFixed(2)} B`
+  if (!Number.isFinite(bytes) || bytes < 0) return '0 B';
+  if (bytes === 0) return '0 B';
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
-  if (i < 0) return `${bytes.toFixed(2)} B`
-  if (i >= sizes.length) return `${(bytes / Math.pow(k, sizes.length - 1)).toFixed(1)} ${sizes[sizes.length - 1]}`
-  
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+  // Handle small values
+  if (bytes < 1) return `${bytes.toFixed(2)} B`;
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  if (i < 0) return `${bytes.toFixed(2)} B`;
+  if (i >= sizes.length)
+    return `${(bytes / Math.pow(k, sizes.length - 1)).toFixed(1)} ${sizes[sizes.length - 1]}`;
+
+  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
 /**
  * Format network speed
  */
 function formatSpeed(bytesPerSecond: number): string {
-  return `${formatBytes(bytesPerSecond)}/s`
+  return `${formatBytes(bytesPerSecond)}/s`;
 }
 
 /**
  * Format timestamp to time string
  */
 function formatTime(timestamp: number): string {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
-  })
+    second: '2-digit',
+  });
 }
 
 /**
@@ -70,17 +72,17 @@ function formatTime(timestamp: number): string {
 function getChartTitle(type: MetricType): string {
   switch (type) {
     case 'cpu':
-      return 'CPU Usage History'
+      return 'CPU Usage History';
     case 'memory':
-      return 'Memory Usage History'
+      return 'Memory Usage History';
     case 'disk':
-      return 'Disk Usage History'
+      return 'Disk Usage History';
     case 'network':
-      return 'Network Speed History'
+      return 'Network Speed History';
     case 'swap':
-      return 'Swap Usage History'
+      return 'Swap Usage History';
     default:
-      return 'Historical Data'
+      return 'Historical Data';
   }
 }
 
@@ -89,9 +91,9 @@ function getChartTitle(type: MetricType): string {
  */
 function getYAxisLabel(type: MetricType): string {
   if (type === 'network') {
-    return 'Speed'
+    return 'Speed';
   }
-  return 'Usage (%)'
+  return 'Usage (%)';
 }
 
 /**
@@ -101,40 +103,40 @@ function transformData(type: MetricType, data: DynamicSystemStatus[]) {
   return data.map((status) => {
     const baseData = {
       timestamp: status.timestamp,
-      time: formatTime(status.timestamp)
-    }
-    
+      time: formatTime(status.timestamp),
+    };
+
     switch (type) {
       case 'cpu':
         return {
           ...baseData,
-          value: status.cpuUsage
-        }
+          value: status.cpuUsage,
+        };
       case 'memory':
         return {
           ...baseData,
-          value: status.memoryUsage
-        }
+          value: status.memoryUsage,
+        };
       case 'disk':
         return {
           ...baseData,
-          value: status.diskUsage
-        }
+          value: status.diskUsage,
+        };
       case 'network':
         return {
           ...baseData,
           upload: status.networkUpload ?? 0,
-          download: status.networkDownload ?? 0
-        }
+          download: status.networkDownload ?? 0,
+        };
       case 'swap':
         return {
           ...baseData,
-          value: status.swapUsage
-        }
+          value: status.swapUsage,
+        };
       default:
-        return baseData
+        return baseData;
     }
-  })
+  });
 }
 
 /**
@@ -142,17 +144,13 @@ function transformData(type: MetricType, data: DynamicSystemStatus[]) {
  */
 function CustomTooltip({ active, payload, label, type }: any) {
   if (!active || !payload || !payload.length) {
-    return null
+    return null;
   }
-  
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-card border border-border rounded-lg p-3 shadow-lg"
-    >
+    <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
       <p className="text-sm font-medium mb-2">{label}</p>
-      
+
       {type === 'network' ? (
         <>
           <div className="flex items-center gap-2 text-sm">
@@ -173,32 +171,36 @@ function CustomTooltip({ active, payload, label, type }: any) {
           <span className="font-semibold">{payload?.[0]?.value?.toFixed(1) ?? 0}%</span>
         </div>
       )}
-    </motion.div>
-  )
+    </div>
+  );
 }
 
 /**
  * HistoryChart Component
  * Displays historical trend data for monitoring metrics
  * Requirements: 5.4, 9.4, 9.5, 9.6
- * 
+ *
  * Features:
  * - Uses Recharts library for smooth animations
  * - Network chart displays dual curves (upload + download)
  * - Responsive chart sizing
  * - Smooth data transition animations
+ * - Elastic animation on chart load
  */
-export function HistoryChart({ type, data, className }: HistoryChartProps) {
-  const chartData = transformData(type, data)
-  const title = getChartTitle(type)
-  const yAxisLabel = getYAxisLabel(type)
-  
+// Animation variants for chart container
+export const HistoryChart = React.memo(function HistoryChart({
+  type,
+  data,
+  className,
+}: HistoryChartProps) {
+  const chartData = transformData(type, data);
+  const title = getChartTitle(type);
+  const yAxisLabel = getYAxisLabel(type);
+
   // If no data, show empty state
   if (!data || data.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className={cn(
           'rounded-lg border border-border bg-card p-6',
           'flex items-center justify-center',
@@ -209,70 +211,63 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
         <div className="text-center">
           <p className="text-foreground-secondary text-sm">No historical data available</p>
         </div>
-      </motion.div>
-    )
+      </div>
+    );
   }
-  
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
-      className={cn(
-        'rounded-lg border border-border bg-card p-6',
-        className
-      )}
+      className={cn('rounded-lg border border-border bg-card p-6', className)}
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{ 
+        duration: 0.5, 
+        ease: [0.6, -0.05, 0.01, 0.99], // Elastic easing
+        height: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+      }}
     >
       {/* Chart Title */}
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
-      
+
       {/* Chart Container */}
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={chartData}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke="rgb(var(--border))"
-            opacity={0.3}
-          />
-          
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" opacity={0.3} />
+
           <XAxis
             dataKey="time"
             stroke="rgb(var(--foreground-secondary))"
             tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
             tickLine={{ stroke: 'rgb(var(--border))' }}
           />
-          
+
           <YAxis
             stroke="rgb(var(--foreground-secondary))"
             tick={{ fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }}
             tickLine={{ stroke: 'rgb(var(--border))' }}
-            label={{ 
-              value: yAxisLabel, 
-              angle: -90, 
+            label={{
+              value: yAxisLabel,
+              angle: -90,
               position: 'insideLeft',
-              style: { fill: 'rgb(var(--foreground-secondary))', fontSize: 12 }
+              style: { fill: 'rgb(var(--foreground-secondary))', fontSize: 12 },
             }}
             tickFormatter={type === 'network' ? formatBytes : undefined}
           />
-          
-          <Tooltip 
+
+          <Tooltip
             content={<CustomTooltip type={type} />}
             cursor={{ stroke: 'rgb(var(--border))', strokeWidth: 1 }}
             animationDuration={0}
           />
-          
+
           {/* Network chart: dual curves for upload and download */}
           {type === 'network' ? (
             <>
-              <Legend 
+              <Legend
                 wrapperStyle={{ paddingTop: '20px' }}
                 iconType="line"
                 formatter={(value) => {
-                  return <span style={{ color: 'rgb(var(--foreground))' }}>{value}</span>
+                  return <span style={{ color: 'rgb(var(--foreground))' }}>{value}</span>;
                 }}
               />
               <Line
@@ -282,7 +277,8 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
                 stroke="rgb(var(--primary))"
                 strokeWidth={2}
                 dot={false}
-                isAnimationActive={false}
+                isAnimationActive={true}
+                animationDuration={400}
               />
               <Line
                 type="monotone"
@@ -291,7 +287,8 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
                 stroke="rgb(var(--success))"
                 strokeWidth={2}
                 dot={false}
-                isAnimationActive={false}
+                isAnimationActive={true}
+                animationDuration={400}
               />
             </>
           ) : (
@@ -302,19 +299,12 @@ export function HistoryChart({ type, data, className }: HistoryChartProps) {
               stroke="rgb(var(--primary))"
               strokeWidth={2}
               dot={false}
-              isAnimationActive={false}
+              isAnimationActive={true}
+              animationDuration={400}
             />
           )}
         </LineChart>
       </ResponsiveContainer>
     </motion.div>
-  )
-}
-
-
-
-
-
-
-
-
+  );
+});

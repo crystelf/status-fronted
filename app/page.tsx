@@ -12,11 +12,12 @@ import { VirtualizedGrid } from '@/components/virtualized-grid';
 import { useClientDetail, useClientHistory } from '@/lib/use-api';
 import { useIncrementalClients } from '@/lib/use-incremental-clients';
 import { ClientSummary, ClientDetail, apiClient } from '@/lib/api-client';
-import { Loader2, Layers, Grid3x3, RefreshCw, X } from 'lucide-react';
+import { Loader2, Layers, Grid3x3, RefreshCw, X, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MetricModule } from '@/components/metric-module';
 import { HistoryChart } from '@/components/history-chart';
 import { MultiDiskDetail } from '@/components/multi-disk-detail';
+import { TimeRangeSelector } from '@/components/time-range-selector';
 
 /**
  * View mode type
@@ -126,6 +127,19 @@ export default function DashboardPage() {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [clientDetailsMap, setClientDetailsMap] = useState<Map<string, ClientDetail>>(new Map());
+  const [timeRange, setTimeRange] = useState<string>('4h');
+  const [availableTimeRanges, setAvailableTimeRanges] = useState<Array<{ value: string; label: string }>>([
+    { value: '4h', label: '4小时' },
+    { value: '8h', label: '8小时' },
+    { value: '12h', label: '12小时' },
+    { value: '24h', label: '24小时' },
+    { value: '7days', label: '7天' },
+    { value: '30days', label: '30天' },
+    { value: '60days', label: '60天' },
+    { value: '90days', label: '90天' },
+    { value: '180days', label: '180天' },
+    { value: '365days', label: '1年' }
+  ]);
   
   // Track pending requests to avoid duplicate requests
   const pendingRequestsRef = useRef<Set<string>>(new Set());
@@ -169,6 +183,35 @@ export default function DashboardPage() {
     }
   }, [fetchClients]);
 
+  // Calculate start time based on selected time range
+  const calculateStartTime = (range: string): number => {
+    const endTime = Date.now();
+    switch (range) {
+      case '4h':
+        return endTime - 4 * 60 * 60 * 1000;
+      case '8h':
+        return endTime - 8 * 60 * 60 * 1000;
+      case '12h':
+        return endTime - 12 * 60 * 60 * 1000;
+      case '24h':
+        return endTime - 24 * 60 * 60 * 1000;
+      case '7days':
+        return endTime - 7 * 24 * 60 * 60 * 1000;
+      case '30days':
+        return endTime - 30 * 24 * 60 * 60 * 1000;
+      case '60days':
+        return endTime - 60 * 24 * 60 * 60 * 1000;
+      case '90days':
+        return endTime - 90 * 24 * 60 * 60 * 1000;
+      case '180days':
+        return endTime - 180 * 24 * 60 * 60 * 1000;
+      case '365days':
+        return endTime - 365 * 24 * 60 * 60 * 1000;
+      default:
+        return endTime - 4 * 60 * 60 * 1000;
+    }
+  };
+
   // Handle client card click - open detail modal
   const handleClientClick = useCallback(
     async (clientId: string) => {
@@ -189,12 +232,25 @@ export default function DashboardPage() {
         }
       }
 
-      // Fetch last 24 hours of history
+      // Fetch history based on selected time range
       const endTime = Date.now();
-      const startTime = endTime - 24 * 60 * 60 * 1000;
+      const startTime = calculateStartTime(timeRange);
       await fetchHistory(clientId, { startTime, endTime });
     },
-    [fetchDetail, fetchHistory, clientDetailsMap]
+    [fetchDetail, fetchHistory, clientDetailsMap, timeRange]
+  );
+
+  // Refresh history when time range changes
+  const handleTimeRangeChange = useCallback(
+    async (newRange: string) => {
+      setTimeRange(newRange);
+      if (expandedClientId) {
+        const endTime = Date.now();
+        const startTime = calculateStartTime(newRange);
+        await fetchHistory(expandedClientId, { startTime, endTime });
+      }
+    },
+    [expandedClientId, fetchHistory, calculateStartTime]
   );
 
   // Handle metric module click
@@ -572,31 +628,52 @@ export default function DashboardPage() {
                     </div>
 
                     {/* History Chart */}
-                    <AnimatePresence mode="wait">
-                      {expandedMetric && clientHistory && clientHistory.length > 0 && (
-                        <motion.div
-                          key={expandedMetric}
-                          className="w-full"
-                          initial="hidden"
-                          animate="visible"
-                          exit="exit"
-                          variants={slideVariants}
-                          transition={smoothTransition}
-                          style={{
-                            willChange: 'transform, opacity',
-                          }}
-                        >
-                          {expandedMetric === 'disk' ? (
-                            <MultiDiskDetail
-                              disks={'staticInfo' in detail ? detail.staticInfo.disks || [] : []}
-                              diskUsages={'currentStatus' in detail ? detail.currentStatus.diskUsages || [] : []}
-                            />
-                          ) : (
-                            <HistoryChart type={expandedMetric as any} data={clientHistory} />
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                      <AnimatePresence mode="wait">
+                        {expandedMetric && (
+                          <motion.div
+                            key={`${expandedClientId}-${expandedMetric}`}
+                            className="w-full"
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            variants={slideVariants}
+                            transition={smoothTransition}
+                            style={{
+                              willChange: 'transform, opacity',
+                            }}
+                          >
+                            {/* Time Range Selector */}
+                            <div className="flex items-center justify-end mb-4">
+                              <label className="text-sm text-foreground-secondary mr-2 flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                              </label>
+                              <div className="relative min-w-[120px]">
+                                {/* Dropdown state management */}
+                                <TimeRangeSelector
+                                  availableTimeRanges={availableTimeRanges}
+                                  selectedRange={timeRange}
+                                  onRangeChange={handleTimeRangeChange}
+                                  clientId={expandedClientId}
+                                />
+                              </div>
+                            </div>
+                            
+                            {expandedMetric === 'disk' ? (
+                              <MultiDiskDetail
+                                disks={'staticInfo' in detail ? detail.staticInfo.disks || [] : []}
+                                diskUsages={'currentStatus' in detail ? detail.currentStatus.diskUsages || [] : []}
+                              />
+                            ) : clientHistory ? (
+                              <HistoryChart type={expandedMetric as any} data={clientHistory} />
+                            ) : (
+                              // Show loading state while history data is fetching
+                              <div className="rounded-lg border border-border bg-card p-6 flex items-center justify-center min-h-[300px]">
+                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                   </div>
                 </motion.div>
               </div>

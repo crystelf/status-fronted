@@ -128,7 +128,8 @@ export function useClientHistory(clientId?: string) {
         return;
       }
 
-      setState({ data: null, loading: true, error: null });
+      // Keep existing data while loading new data
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
       try {
         const history = await apiClient.fetchClientHistory(targetId, query);
@@ -137,7 +138,8 @@ export function useClientHistory(clientId?: string) {
       } catch (error) {
         const userError = handleApiError(error);
         logError(error, 'useClientHistory');
-        setState({ data: null, loading: false, error: userError });
+        // Keep existing data on error
+        setState(prev => ({ ...prev, loading: false, error: userError }));
         throw error;
       }
     },
