@@ -54,6 +54,8 @@ export interface ClientSummary {
   platform: string;
   status: 'online' | 'offline';
   lastUpdate: number;
+  createdAt: number;
+  lastOnlineAt: number | null;
 }
 
 export interface ClientDetail extends ClientSummary {
