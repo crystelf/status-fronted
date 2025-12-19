@@ -2,7 +2,7 @@
 
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Circle, Tag, Activity, Server, Monitor, Smartphone } from 'lucide-react';
+import { Circle, Tag, Activity, Server, Monitor, Smartphone, Globe } from 'lucide-react';
 import {
   Cell,
   Line,
@@ -393,50 +393,31 @@ export const ClientCard = memo(
         : undefined;
 
     return (
-      <motion.div
-        custom={index}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        whileTap={onClick ? tapAnimation : undefined}
-        whileHover={onClick ? { borderColor: 'rgb(59, 130, 246)' } : undefined}
-        className={cn(
-          'rounded-xl border-2 border-border bg-card p-5',
-          'shadow-sm hover:shadow-lg transition-all duration-300',
-          onClick && 'cursor-pointer'
-        )}
-        onClick={() => onClick?.(client.clientId)}
-        style={{
-          willChange: 'transform, opacity',
-          transform: 'translateZ(0)',
-        }}
-      >
-        {/* Header: Server Name and Status */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex-shrink-0">
-              <PlatformIcon className="w-6 h-6 text-foreground-secondary" strokeWidth={1.5} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-lg font-bold truncate mb-1">{client.hostname}</h3>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-foreground-secondary">{platformName}</span>
-                {staticInfo?.cpuArch && (
-                  <>
-                    <span className="text-xs text-foreground-secondary">•</span>
-                    <span className="text-xs text-foreground-secondary">{staticInfo.cpuArch}</span>
-                  </>
-                )}
-                {staticInfo?.location && (
-                  <>
-                    <span className="text-xs text-foreground-secondary">•</span>
-                    <span className="text-xs text-foreground-secondary">{staticInfo.location}</span>
-                  </>
-                )}
-              </div>
-            </div>
+        <motion.div
+          custom={index}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          whileTap={onClick ? tapAnimation : undefined}
+          whileHover={onClick ? { borderColor: 'rgb(59, 130, 246)' } : undefined}
+          className={cn(
+            'rounded-xl border-2 border-border bg-card p-5',
+            'shadow-sm hover:shadow-lg transition-all duration-300',
+            onClick && 'cursor-pointer'
+          )}
+          onClick={() => onClick?.(client.clientId)}
+          style={{
+            willChange: 'transform, opacity',
+            transform: 'translateZ(0)',
+          }}
+        >
+          {/* Hostname - Centered at top */}
+          <div className="text-center mb-3">
+            <h3 className="text-lg font-bold">{client.hostname}</h3>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+
+          {/* Status and Time */}
+          <div className="flex items-center gap-2 mb-3">
             <Circle
               className={cn(
                 'w-2.5 h-2.5',
@@ -456,92 +437,112 @@ export const ClientCard = memo(
               {isOnline ? 'Online' : 'Offline'} {calculateStatusDuration()}
             </span>
           </div>
-        </div>
 
-        {/* Tags */}
-        {client.clientTags && client.clientTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {client.clientTags.map((tag, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md bg-primary/10 text-primary border border-primary/20"
-              >
-                <Tag className="w-3 h-3" strokeWidth={1.5} />
-                {tag}
-              </span>
-            ))}
+          {/* System Version and Architecture */}
+          <div className="flex items-center gap-2 text-xs text-foreground-secondary mb-3">
+            <PlatformIcon className="w-4 h-4" strokeWidth={1.5} />
+            <span>{platformName} {staticInfo?.systemVersion && staticInfo.systemVersion.split(' ')[1]}</span>
+            {staticInfo?.cpuArch && (
+              <>
+                <span>•</span>
+                <span>{staticInfo.cpuArch}</span>
+              </>
+            )}
           </div>
-        )}
 
-        {/* Hardware Section - Three Donut Charts in a row */}
-        {status && (
-          <>
-            <div className="mb-3">
-              <div className="grid grid-cols-3 gap-2">
-                <UsageDonut
-                  label="CPU"
-                  value={status.cpuUsage}
-                  usedColor={getUsageColor(status.cpuUsage)}
-                  detail={staticInfo ? `${staticInfo.cpuCores}C` : undefined}
-                />
-                <UsageDonut
-                  label="Memory"
-                  value={status.memoryUsage}
-                  usedColor={getUsageColor(status.memoryUsage)}
-                  memoryInfo={memoryInfo}
-                />
-                <UsageDonut
-                  label="Swap"
-                  value={status.swapUsage > 0 ? status.swapUsage : undefined}
-                  usedColor={getUsageColor(status.swapUsage || 0)}
-                  detail={status.swapUsage > 0 ? `${status.swapUsage.toFixed(1)}%` : 'N/A'}
-                />
-              </div>
+          {/* Location and Timezone */}
+          {staticInfo?.location && (
+            <div className="flex items-center gap-2 text-xs text-foreground-secondary mb-3">
+              <span>{staticInfo.location}</span>
+              <span>•</span>
+              <span>Etc/UTC</span>
             </div>
+          )}
 
-            {/* Network Section - Line Chart */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <h4 className="text-xs font-semibold text-foreground">Network</h4>
-                <div className="flex items-center gap-2 text-xs text-foreground-secondary">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span>↑ {formatSpeed(status.networkUpload)}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-success" />
-                    <span>↓ {formatSpeed(status.networkDownload)}</span>
-                  </div>
+          {/* Tags - After timezone */}
+          {client.clientTags && client.clientTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {client.clientTags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md bg-primary/10 text-primary border border-primary/20"
+                >
+                  <Tag className="w-3 h-3" strokeWidth={1.5} />
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Hardware Section - Three Donut Charts in a row */}
+          {status && (
+            <>
+              <div className="mb-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <UsageDonut
+                    label="CPU"
+                    value={status.cpuUsage}
+                    usedColor={getUsageColor(status.cpuUsage)}
+                    detail={staticInfo ? `${staticInfo.cpuCores}C` : undefined}
+                  />
+                  <UsageDonut
+                    label="Memory"
+                    value={status.memoryUsage}
+                    usedColor={getUsageColor(status.memoryUsage)}
+                    memoryInfo={memoryInfo}
+                  />
+                  <UsageDonut
+                    label="Swap"
+                    value={status.swapUsage > 0 ? status.swapUsage : undefined}
+                    usedColor={getUsageColor(status.swapUsage || 0)}
+                    detail={status.swapUsage > 0 ? `${status.swapUsage.toFixed(1)}%` : 'N/A'}
+                  />
                 </div>
               </div>
-              <NetworkLineChart upload={status.networkUpload} download={status.networkDownload} />
-            </div>
 
-            {/* Disk Section - Multiple Disks */}
-            {status.diskUsages && status.diskUsages.length > 0 && (
+              {/* Network Section - Line Chart */}
               <div className="mb-3">
-                <MultiDiskUsage diskUsages={status.diskUsages} />
+                <div className="flex items-center justify-between mb-1.5">
+                  <h4 className="text-xs font-semibold text-foreground">Network</h4>
+                  <div className="flex items-center gap-2 text-xs text-foreground-secondary">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span>↑ {formatSpeed(status.networkUpload)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                      <span>↓ {formatSpeed(status.networkDownload)}</span>
+                    </div>
+                  </div>
+                </div>
+                <NetworkLineChart upload={status.networkUpload} download={status.networkDownload} />
               </div>
-            )}
-          </>
-        )}
 
-        {!status && (
-          <div className="text-center text-sm text-foreground-secondary py-8">
-            <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
-            <p>No real-time occupancy data </p>
-          </div>
-        )}
+              {/* Disk Section - Multiple Disks */}
+              {status.diskUsages && status.diskUsages.length > 0 && (
+                <div className="mb-3">
+                  <MultiDiskUsage diskUsages={status.diskUsages} />
+                </div>
+              )}
+            </>
+          )}
 
-        {/* Footer: Last Update */}
-        <div className="border-t border-border pt-3 mt-4">
-          <div className="flex items-center justify-between text-xs text-foreground-secondary">
-            <span>Last updated</span>
-            <span>{new Date(client.lastUpdate).toLocaleTimeString('en-US')}</span>
+          {!status && (
+            <div className="text-center text-sm text-foreground-secondary py-8">
+              <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
+              <p>No real-time occupancy data </p>
+            </div>
+          )}
+
+          {/* Footer: Last Update */}
+          <div className="border-t border-border pt-3 mt-4">
+            <div className="flex items-center justify-between text-xs text-foreground-secondary">
+              <span>Last updated</span>
+              <span>{new Date(client.lastUpdate).toLocaleTimeString('en-US')}</span>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    );
+        </motion.div>
+      );
   },
   (prevProps: ClientCardProps, nextProps: ClientCardProps) => {
     // Custom comparison function for memo
