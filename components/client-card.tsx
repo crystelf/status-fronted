@@ -352,6 +352,25 @@ export const ClientCard = memo(
         : undefined
       : undefined;
 
+    // Calculate status duration
+    const calculateStatusDuration = (): string => {
+      const now = Date.now();
+      const timeDiff = now - client.lastUpdate;
+      
+      // Convert milliseconds to days, hours, minutes
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''}`;
+      } else if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+      } else {
+        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+      }
+    };
+
     const PlatformIcon = getPlatformIcon(client.platform);
     const platformName = getPlatformName(client.platform, staticInfo?.systemVersion);
 
@@ -423,7 +442,7 @@ export const ClientCard = memo(
                 'w-2.5 h-2.5',
                 isOnline
                   ? 'fill-success text-success'
-                  : 'fill-foreground-secondary text-foreground-secondary'
+                  : 'fill-danger text-danger'
               )}
             />
             <span
@@ -431,10 +450,10 @@ export const ClientCard = memo(
                 'text-xs font-medium px-2 py-0.5 rounded-full',
                 isOnline
                   ? 'bg-success/10 text-success'
-                  : 'bg-foreground-secondary/10 text-foreground-secondary'
+                  : 'bg-danger/10 text-danger'
               )}
             >
-              {isOnline ? 'Online' : 'Offline'}
+              {isOnline ? 'Online' : 'Offline'} {calculateStatusDuration()}
             </span>
           </div>
         </div>
