@@ -28,7 +28,7 @@ interface ClientCardProps {
 /**
  * Get platform icon component based on OS type
  */
-function getPlatformIcon(platform: string) {
+function getPlatformIcon(platform: string, systemVersion?: string) {
   const platformLower = platform.toLowerCase();
   if (platformLower.includes('windows') || platformLower === 'win32') {
     return Monitor;
@@ -41,20 +41,34 @@ function getPlatformIcon(platform: string) {
 }
 
 /**
- * Get simplified platform name
+ * Get formatted platform name with version
  */
-function getPlatformName(platform: string, systemVersion?: string): string {
+function getPlatformNameWithVersion(platform: string, systemVersion?: string): string {
   const platformLower = platform.toLowerCase();
   if (platformLower.includes('windows')) {
+    if (systemVersion) {
+      // Extract Windows version number from string like "Microsoft Windows Server 2025 Datacenter 10.0.26100"
+      // For Windows, we want to show "Windows 11", "Windows Server 2025", etc.
+      const winMatch = systemVersion.match(/(Windows\s+(Server\s+)?\d+)/i);
+      if (winMatch) {
+        return winMatch[0];
+      }
+      // If no match, just show "Windows" with the major version
+      const versionMatch = systemVersion.match(/(\d+\.\d+)/);
+      return versionMatch ? `Windows ${versionMatch[0]}` : 'Windows';
+    }
     return 'Windows';
   } else if (platformLower.includes('linux')) {
     if (systemVersion) {
-      // Extract distro name from version string like "Ubuntu 24.04" or "Debian"
-      const match = systemVersion.match(/^([A-Za-z]+)/);
-      return match ? match[1] : 'Linux';
+      // For Linux, show full distro name and version like "Ubuntu 24.04"
+      return systemVersion;
     }
     return 'Linux';
   } else if (platformLower.includes('darwin') || platformLower.includes('mac')) {
+    if (systemVersion) {
+      // For macOS, show "macOS 25.0.0" format
+      return systemVersion;
+    }
     return 'macOS';
   }
   return platform;
@@ -382,8 +396,8 @@ export const ClientCard = memo(
       }
     };
 
-    const PlatformIcon = getPlatformIcon(client.platform);
-    const platformName = getPlatformName(client.platform, staticInfo?.systemVersion);
+    const PlatformIcon = getPlatformIcon(client.platform, staticInfo?.systemVersion);
+    const platformName = getPlatformNameWithVersion(client.platform, staticInfo?.systemVersion);
 
     // Calculate memory info
     const memoryInfo =
@@ -448,9 +462,7 @@ export const ClientCard = memo(
         {/* System Version and Architecture */}
         <div className="flex items-center gap-2 text-xs text-foreground-secondary mb-3">
           <PlatformIcon className="w-4 h-4" strokeWidth={1.5} />
-          <span>
-            {platformName} {staticInfo?.systemVersion && staticInfo.systemVersion.split(' ')[1]}
-          </span>
+          <span>{platformName}</span>
           {staticInfo?.cpuArch && (
             <>
               <span>•</span>
