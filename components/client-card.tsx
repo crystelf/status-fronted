@@ -477,7 +477,7 @@ export const ClientCard = memo(
             <Globe className="w-4 h-4" strokeWidth={1.5} />
             <span>{staticInfo.location}</span>
             <span>•</span>
-            <span>Etc/UTC</span>
+            <span>{staticInfo.timezone || 'Etc/UTC'}</span>
           </div>
         )}
 
