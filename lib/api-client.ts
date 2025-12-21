@@ -31,7 +31,6 @@ export interface StaticSystemInfo {
   totalDisk: number;
   disks: DiskInfo[];
   location: string;
-  timezone: string;
 }
 
 export interface DynamicSystemStatus {

@@ -471,13 +471,11 @@ export const ClientCard = memo(
           )}
         </div>
 
-        {/* Location and Timezone */}
+        {/* Location */}
         {staticInfo?.location && (
           <div className="flex items-center gap-2 text-xs text-foreground-secondary mb-3">
             <Globe className="w-4 h-4" strokeWidth={1.5} />
             <span>{staticInfo.location}</span>
-            <span>•</span>
-            <span>{staticInfo.timezone || 'Etc/UTC'}</span>
           </div>
         )}
 

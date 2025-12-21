@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 interface TimeRangeSelectorProps {
   availableTimeRanges: Array<{ value: string; label: string }>;
@@ -65,11 +64,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
       >
-        {availableTimeRanges.find(range => range.value === selectedRange)?.label || '选择时间范围'}
-        <motion.svg 
-          className="w-4 h-4 opacity-50" 
-          fill="none" 
-          stroke="currentColor" 
+        {availableTimeRanges.find((range) => range.value === selectedRange)?.label ||
+          '选择时间范围'}
+        <motion.svg
+          className="w-4 h-4 opacity-50"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -89,7 +89,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{
               duration: 0.2,
-              ease: [0.6, -0.05, 0.01, 0.99]
+              ease: [0.6, -0.05, 0.01, 0.99],
             }}
           >
             {availableTimeRanges.map((range) => (
@@ -97,16 +97,19 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 key={range.value}
                 onClick={() => handleSelect(range.value)}
                 className={`w-full px-4 py-2 text-sm text-left transition-all duration-200 ${selectedRange === range.value ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-background-secondary'}`}
-                whileHover={{ 
-                  backgroundColor: selectedRange === range.value ? 'rgb(var(--primary)/10)' : 'rgb(var(--background-secondary))',
-                  x: 4
+                whileHover={{
+                  backgroundColor:
+                    selectedRange === range.value
+                      ? 'rgb(var(--primary)/10)'
+                      : 'rgb(var(--background-secondary))',
+                  x: 4,
                 }}
                 whileTap={{ scale: 0.98 }}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
                   delay: availableTimeRanges.indexOf(range) * 0.03,
-                  duration: 0.2
+                  duration: 0.2,
                 }}
               >
                 {range.label}

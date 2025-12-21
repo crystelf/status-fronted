@@ -2,15 +2,7 @@
 
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Droplet,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { Cpu, MemoryStick, HardDrive, Network, Droplet, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hoverAnimation, tapAnimation } from '@/lib/animation-config';
 
