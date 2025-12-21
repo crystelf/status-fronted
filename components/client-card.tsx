@@ -436,9 +436,9 @@ export const ClientCard = memo(
           transform: 'translateZ(0)',
         }}
       >
-        {/* Hostname - Centered at top */}
+        {/* Client Name - Centered at top */}
         <div className="text-center mb-3">
-          <h3 className="text-lg font-bold">{client.hostname}</h3>
+          <h3 className="text-lg font-bold">{client.clientName}</h3>
         </div>
 
         {/* Status and Time */}
