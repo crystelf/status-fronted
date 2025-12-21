@@ -56,6 +56,7 @@ export interface ClientSummary {
   lastUpdate: number;
   createdAt: number;
   lastOnlineAt: number | null;
+  priority: number;
 }
 
 export interface ClientDetail extends ClientSummary {

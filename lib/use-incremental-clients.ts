@@ -57,23 +57,24 @@ export function useIncrementalClients() {
     });
 
     try {
-      const newClients = await apiClient.fetchAllClients();
+      // Fetch clients and sort by priority
+      let newClients = await apiClient.fetchAllClients();
+      // Sort clients by priority (lower number = higher priority)
+      newClients = newClients.sort((a, b) => a.priority - b.priority);
       const now = Date.now();
 
       setState((prev) => {
-        const updatedClients = new Map(prev.clients);
+        const updatedClients = new Map();
         const changedIds = new Set<string>();
-
-        // Track existing client IDs
-        const existingIds = new Set(updatedClients.keys());
+        const existingIds = new Set(prev.clients.keys());
         const newIds = new Set(newClients.map((c) => c.clientId));
 
-        // Update or add clients
+        // Add/update clients in sorted order
         newClients.forEach((newClient) => {
-          const existingClient = updatedClients.get(newClient.clientId);
-
+          const existingClient = prev.clients.get(newClient.clientId);
+          updatedClients.set(newClient.clientId, newClient);
+          
           if (!existingClient || hasClientChanged(existingClient, newClient)) {
-            updatedClients.set(newClient.clientId, newClient);
             changedIds.add(newClient.clientId);
           }
         });
@@ -81,7 +82,6 @@ export function useIncrementalClients() {
         // Remove clients that no longer exist
         existingIds.forEach((id) => {
           if (!newIds.has(id)) {
-            updatedClients.delete(id);
             changedIds.add(id);
           }
         });
