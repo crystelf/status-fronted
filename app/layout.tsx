@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
+import { FaviconManager } from '@/components/favicon-manager'
 import React from 'react';
 
 export const metadata: Metadata = {
   title: 'System Monitor',
   description: 'Real-time system monitoring dashboard',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 }
 
@@ -47,6 +49,7 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="system-monitor-theme">
+          <FaviconManager />
           {children}
         </ThemeProvider>
       </body>
