@@ -32,26 +32,28 @@ export const easeTransition: Transition = {
 /**
  * Card entrance animation variants
  * Uses transform (translateY) and opacity for GPU acceleration
+ * Optimized for performance with elastic easeInOut effect
  */
 export const cardVariants: Variants = {
   hidden: { 
     opacity: 0, 
     y: 20,
-    scale: 0.95,
   },
-  visible: (index: number = 0) => ({ 
+  visible: {
     opacity: 1, 
     y: 0,
-    scale: 1,
     transition: {
-      ...smoothTransition,
-      delay: index * 0.03, // Reduced stagger for better performance
+      duration: 0.5,
+      ease: "easeInOut", // Elastic easeInOut effect for smooth animation
     }
-  }),
+  },
   exit: {
     opacity: 0,
-    scale: 0.95,
-    transition: fastTransition,
+    y: 10,
+    transition: {
+      duration: 0.3,
+      ease: "easeInOut",
+    },
   }
 }
 
