@@ -22,6 +22,7 @@ import { cardVariants, tapAnimation } from '@/lib/animation-config';
 interface ClientCardProps {
   client: ClientSummary | ClientDetail;
   onClick?: (clientId: string) => void;
+  index?: number;
 }
 
 /**
@@ -354,7 +355,7 @@ function isClientDetail(client: ClientSummary | ClientDetail): client is ClientD
  * Modern card design with donut charts and line graphs
  */
 export const ClientCard = memo(
-  function ClientCard({ client, onClick }: ClientCardProps) {
+  function ClientCard({ client, onClick, index = 0 }: ClientCardProps) {
     const isOnline = client.status === 'online';
     const hasDetailedInfo = isClientDetail(client);
     const status = hasDetailedInfo
@@ -417,23 +418,24 @@ export const ClientCard = memo(
         : undefined;
 
     return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileTap={onClick ? tapAnimation : undefined}
-      whileHover={onClick ? { borderColor: 'rgb(59, 130, 246)' } : undefined}
-      className={cn(
-        'rounded-xl border-2 border-border bg-card p-5',
-        'shadow-sm hover:shadow-lg transition-all duration-300',
-        onClick && 'cursor-pointer'
-      )}
-      onClick={() => onClick?.(client.clientId)}
-      style={{
-        willChange: 'transform, opacity',
-        transform: 'translateZ(0)',
-      }}
-    >
+      <motion.div
+        custom={index}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        whileTap={onClick ? tapAnimation : undefined}
+        whileHover={onClick ? { borderColor: 'rgb(59, 130, 246)' } : undefined}
+        className={cn(
+          'rounded-xl border-2 border-border bg-card p-5',
+          'shadow-sm hover:shadow-lg transition-all duration-300',
+          onClick && 'cursor-pointer'
+        )}
+        onClick={() => onClick?.(client.clientId)}
+        style={{
+          willChange: 'transform, opacity',
+          transform: 'translateZ(0)',
+        }}
+      >
         {/* Client Name - Centered at top */}
         <div className="text-center mb-3">
           <h3 className="text-lg font-bold">{client.clientName}</h3>
@@ -570,7 +572,8 @@ export const ClientCard = memo(
       prevProps.client.lastUpdate === nextProps.client.lastUpdate &&
       prevProps.client.clientName === nextProps.client.clientName &&
       JSON.stringify(prevProps.client.clientTags) === JSON.stringify(nextProps.client.clientTags) &&
-      prevProps.client.clientPurpose === nextProps.client.clientPurpose
+      prevProps.client.clientPurpose === nextProps.client.clientPurpose &&
+      prevProps.index === nextProps.index
     );
   }
 );

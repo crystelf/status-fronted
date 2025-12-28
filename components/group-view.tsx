@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { ChevronDown, Layers } from 'lucide-react';
 import { useState } from 'react';
-import { staggerContainer } from '@/lib/animation-config';
 import { ClientSummary } from '@/lib/api-client';
 import { ClientCard } from './client-card';
 import { cn } from '@/lib/utils';
@@ -98,16 +97,18 @@ index }: {
   const displayName = groupBy === 'platform' ? getPlatformDisplayName(groupName) : groupName;
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        delay: index * 0.05,
+        ease: 'easeOut',
+      }}
+      className="space-y-4"
+    >
       {/* Group Header */}
-      <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.5,
-          delay: index * 0.05,
-          ease: 'easeInOut',
-        }}
+      <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           'w-full flex items-center justify-between p-4 rounded-lg',
@@ -117,7 +118,7 @@ index }: {
         )}
       >
         <div className="flex items-center gap-3">
-          <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2, ease: 'easeInOut' }}>
+          <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2 }}>
             <ChevronDown className="w-5 h-5 text-foreground-secondary" />
           </motion.div>
 
@@ -134,47 +135,30 @@ index }: {
         >
           {clients.length}
         </div>
-      </motion.button>
+      </button>
 
       {/* Group Content */}
-        <motion.div
-          initial={{ 
-            opacity: 0, 
-            height: isExpanded ? 'auto' : 0
-          }}
-          animate={{
-            opacity: isExpanded ? 1 : 0,
-            height: isExpanded ? 'auto' : 0,
-          }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-          className="overflow-hidden"
-        >
-          <motion.div 
-            className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4 pl-4"
-            initial="hidden"
-            animate={isExpanded ? "visible" : "hidden"}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.03,
-                  delayChildren: 0,
-                  ease: "easeInOut",
-                }
-              }
-            }}
-          >
-            {clients.map((client) => (
-              <ClientCard
-                key={client.clientId}
-                client={client}
-                onClick={onClientClick}
-              />
-            ))}
-          </motion.div>
-        </motion.div>
-    </div>
+      <motion.div
+        initial={false}
+        animate={{
+          height: isExpanded ? 'auto' : 0,
+          opacity: isExpanded ? 1 : 0,
+        }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="overflow-hidden"
+      >
+        <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4 pl-4">
+          {clients.map((client, clientIndex) => (
+            <ClientCard
+              key={client.clientId}
+              client={client}
+              onClick={onClientClick}
+              index={clientIndex}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

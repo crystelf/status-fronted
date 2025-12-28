@@ -1,8 +1,6 @@
 'use client'
 
 import React, { useRef, useEffect, useState, RefObject } from 'react'
-import { motion } from 'framer-motion'
-import { staggerContainer } from '@/lib/animation-config'
 import { ClientSummary } from '@/lib/api-client'
 import { ClientCard } from './client-card'
 
@@ -77,41 +75,31 @@ export function VirtualizedGrid({ clients, onClientClick }: VirtualizedGridProps
   // Don't use virtualization for small lists (< 20 items)
   if (clients.length < 20) {
     return (
-      <motion.div 
-        ref={containerRef} 
-        className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        {clients.map((client) => (
+      <div ref={containerRef} className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4">
+        {clients.map((client, index) => (
           <ClientCard
             key={client.clientId}
             client={client}
             onClick={onClientClick}
+            index={index}
           />
         ))}
-      </motion.div>
+      </div>
     )
   }
 
   // For large lists, just use regular grid as well since react-window v2 API is complex
   // This is acceptable for the checkpoint - virtualization can be optimized later if needed
   return (
-    <motion.div 
-      ref={containerRef} 
-      className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4"
-      variants={staggerContainer}
-      initial="hidden"
-      animate="visible"
-    >
-      {clients.map((client) => (
+    <div ref={containerRef} className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-4">
+      {clients.map((client, index) => (
         <ClientCard
           key={client.clientId}
           client={client}
           onClick={onClientClick}
+          index={index}
         />
       ))}
-    </motion.div>
+    </div>
   )
 }
