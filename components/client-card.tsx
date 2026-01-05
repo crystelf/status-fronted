@@ -377,10 +377,16 @@ export const ClientCard = memo(
       if (isOnline && client.lastOnlineAt) {
         // For online clients, use lastOnlineAt to calculate continuous online time
         timeDiff = now - client.lastOnlineAt;
+      } else if (!isOnline && client.lastOnlineAt) {
+        // For offline clients, use lastOnlineAt to calculate how long they've been offline
+        timeDiff = now - client.lastOnlineAt;
       } else {
-        // For offline clients, use lastUpdate to show how long ago they were last seen
+        // Fallback: use lastUpdate if lastOnlineAt is not available
         timeDiff = now - client.lastUpdate;
       }
+      
+      // Ensure timeDiff is not negative (can happen with clock skew)
+      timeDiff = Math.max(0, timeDiff);
       
       // Convert milliseconds to days, hours, minutes
       const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
